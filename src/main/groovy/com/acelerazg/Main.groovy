@@ -5,6 +5,7 @@ import com.acelerazg.modelos.Candidato
 import com.acelerazg.modelos.Competencia
 import com.acelerazg.modelos.Empresa
 
+// Feito por Lucas Carneiro Falcao
 class Main {
     static void main(String[] args) {
         println "Bem vindo ao Linketinder!"
