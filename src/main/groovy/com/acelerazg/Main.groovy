@@ -10,6 +10,69 @@ class Main {
     static void main(String[] args) {
         println "Bem vindo ao Linketinder!"
         Linketinder app = new Linketinder()
+
+        // =========== DADOS PRE-CADASTRADOS =============//
+            app.addCandidato(new Candidato(
+            "Lucas Falcao", "lucas@email.com", "SP", "01000-000",
+            "Desenvolvedor Fullstack", [Competencia.JAVA, Competencia.SPRING_BOOT] as ArrayList,
+            "12345678900", 25
+        ))
+
+        app.addCandidato(new Candidato(
+            "Ana Souza", "ana@email.com", "RJ", "20000-000",
+            "Analista de Dados", [Competencia.PYTHON, Competencia.KAFKA] as ArrayList,
+            "98765432100", 28
+        ))
+
+        app.addCandidato(new Candidato(
+            "Carlos Lima", "carlos@email.com", "MG", "30000-000",
+            "DevOps", [Competencia.DOCKER, Competencia.JENKINS, Competencia.LINUX] as ArrayList,
+            "11223344550", 32
+        ))
+
+        app.addCandidato(new Candidato(
+            "Mariana Alves", "mariana@email.com", "SP", "01000-001",
+            "Frontend Developer", [Competencia.PHP, Competencia.LARAVEL, Competencia.SWAGGER] as ArrayList,
+            "22334455660", 24
+        ))
+
+        app.addCandidato(new Candidato(
+            "Rafael Costa", "rafael@email.com", "RS", "90000-000",
+            "Backend Developer", [Competencia.DOTNET, Competencia.MICRONAUT, Competencia.POSTGRESQL] as ArrayList,
+            "33445566770", 29
+        ))
+
+        app.addEmpresa(new Empresa(
+            "Tech Solutions", "contato@techsolutions.com", "SP", "01001-000",
+            "Consultoria em Tecnologia", [Competencia.JAVA, Competencia.SPRING_BOOT] as ArrayList,
+            "12345678000100", "Brasil"
+        ))
+
+        app.addEmpresa(new Empresa(
+            "DataCorp", "vendas@datacorp.com", "RJ", "20001-000",
+            "Análise de Dados e BI", [Competencia.PYTHON, Competencia.KAFKA] as ArrayList,
+            "98765432000100", "Brasil"
+        ))
+
+        app.addEmpresa(new Empresa(
+            "DevOps Inc", "info@devopsinc.com", "MG", "30001-000",
+            "Serviços DevOps", [Competencia.DOCKER, Competencia.JENKINS, Competencia.LINUX] as ArrayList,
+            "11223344000100", "Brasil"
+        ))
+
+        app.addEmpresa(new Empresa(
+            "Web Creators", "contato@webcreators.com", "SP", "01002-000",
+            "Desenvolvimento Frontend", [Competencia.PHP, Competencia.LARAVEL, Competencia.SWAGGER] as ArrayList,
+            "22334455000100", "Brasil"
+        ))
+
+        app.addEmpresa(new Empresa(
+            "Backend Solutions", "contato@backend.com", "RS", "90001-000",
+            "Soluções Backend", [Competencia.DOTNET, Competencia.MICRONAUT, Competencia.POSTGRESQL] as ArrayList,
+            "33445566000100", "Brasil"
+        ))
+        // ============= //
+
         def appInput = ""
         try (Scanner appScanner = new Scanner(System.in)) {
             while (appInput != "q") {
@@ -23,10 +86,10 @@ class Main {
                 appInput = appScanner.nextLine()
                 switch (appInput) {
                     case "1":
-                        println app.getListaCandidatos()
+                        app.getListaCandidatos().each { println it }
                         break
                     case "2":
-                        println app.getListaEmpresas()
+                        println app.getListaEmpresas().each { println it }
                         break
                     case "3":
                         println "Nome: "
@@ -89,7 +152,7 @@ class Main {
             try {
                 idade = appScanner.nextLine().toInteger()
                 break
-            } catch (Exception e) {
+            } catch (Exception ignored) {
                 println "Valor invalido. Tente novamente"
             }
         }
