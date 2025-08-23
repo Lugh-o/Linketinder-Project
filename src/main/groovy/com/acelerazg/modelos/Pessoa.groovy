@@ -1,20 +1,24 @@
 package com.acelerazg.modelos
 
 abstract class Pessoa {
+    private final int id
     private String nome
     private String email
     private String estado
     private String cep
     private String descricao
-    private ArrayList<Competencia> competencias
 
-    Pessoa(String nome, String email, String estado, String cep, String descricao, ArrayList<Competencia> competencias) {
+    Pessoa(int id, String nome, String email, String estado, String cep, String descricao) {
+        this.id = id
         this.nome = nome
         this.email = email
         this.estado = estado
         this.cep = cep
         this.descricao = descricao
-        this.competencias = competencias
+    }
+
+    int getId() {
+        return id
     }
 
     String getNome() {
@@ -57,25 +61,13 @@ abstract class Pessoa {
         this.descricao = descricao
     }
 
-    ArrayList<Competencia> getCompetencias() {
-        return competencias
-    }
-
-    void setCompetencias(ArrayList<Competencia> competencias) {
-        this.competencias = competencias
-    }
-
-    void addCompetencia(Competencia competencia) {
-        competencias.add(competencia)
-    }
-
     @Override
     String toString() {
-        return "nome='" + nome + '\'' +
-                ", email='" + email + '\'' +
-                ", estado='" + estado + '\'' +
-                ", cep='" + cep + '\'' +
-                ", descricao='" + descricao + '\'' +
-                ", competencias=" + Arrays.toString(competencias)
+        return "id='$id'" +
+                ", nome='$nome'" +
+                ", email='$email'" +
+                ", estado='$estado'" +
+                ", cep='$cep'" +
+                ", descricao='$descricao'"
     }
 }

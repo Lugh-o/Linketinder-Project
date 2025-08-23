@@ -3,11 +3,13 @@ package com.acelerazg.modelos
 class Empresa extends Pessoa{
     private String cnpj
     private String pais
+    private HashMap<Integer, Vaga> listaVagas
 
-    Empresa(String nome, String email, String estado, String cep, String descricao, ArrayList<Competencia> competencias, String cnpj, String pais) {
-        super(nome, email, estado, cep, descricao, competencias)
+    Empresa(int id, String nome, String email, String estado, String cep, String descricao, String cnpj, String pais) {
+        super(id, nome, email, estado, cep, descricao)
         this.cnpj = cnpj
         this.pais = pais
+        this.listaVagas = new HashMap<>()
     }
 
     String getCnpj() {
@@ -26,12 +28,21 @@ class Empresa extends Pessoa{
         this.pais = pais
     }
 
+    HashMap<Integer, Vaga> getListaVagas() {
+        return listaVagas
+    }
+
+    void setListaVagas(HashMap<Integer, Vaga> listaVagas) {
+        this.listaVagas = listaVagas
+    }
+
     @Override
     String toString() {
         return "Empresa{" +
                 super.toString() +
-                ", cnpj='" + cnpj + '\'' +
-                ", pais='" + pais + '\'' +
-                "} " + super.toString();
+                ", cnpj='$cnpj'" +
+                ", pais='$pais'" +
+                ", listaVagas='" + Arrays.toString(listaVagas) + "'" +
+                "} "
     }
 }

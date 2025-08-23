@@ -1,9 +1,9 @@
 package com.acelerazg
 
 import com.acelerazg.linketinder.Linketinder
-import com.acelerazg.modelos.Candidato
 import com.acelerazg.modelos.Competencia
-import com.acelerazg.modelos.Empresa
+import com.acelerazg.modelos.Curtida
+import com.acelerazg.modelos.Vaga
 
 // Feito por Lucas Carneiro Falcao
 class Main {
@@ -12,65 +12,55 @@ class Main {
         Linketinder app = new Linketinder()
 
         // =========== DADOS PRE-CADASTRADOS =============//
-            app.addCandidato(new Candidato(
+            app.addCandidato(
             "Lucas Falcao", "lucas@email.com", "SP", "01000-000",
             "Desenvolvedor Fullstack", [Competencia.JAVA, Competencia.SPRING_BOOT] as ArrayList,
             "12345678900", 25
-        ))
+        )
 
-        app.addCandidato(new Candidato(
-            "Ana Souza", "ana@email.com", "RJ", "20000-000",
+        app.addCandidato("Ana Souza", "ana@email.com", "RJ", "20000-000",
             "Analista de Dados", [Competencia.PYTHON, Competencia.KAFKA] as ArrayList,
             "98765432100", 28
-        ))
+        )
 
-        app.addCandidato(new Candidato(
-            "Carlos Lima", "carlos@email.com", "MG", "30000-000",
+        app.addCandidato("Carlos Lima", "carlos@email.com", "MG", "30000-000",
             "DevOps", [Competencia.DOCKER, Competencia.JENKINS, Competencia.LINUX] as ArrayList,
             "11223344550", 32
-        ))
+        )
 
-        app.addCandidato(new Candidato(
-            "Mariana Alves", "mariana@email.com", "SP", "01000-001",
+        app.addCandidato("Mariana Alves", "mariana@email.com", "SP", "01000-001",
             "Frontend Developer", [Competencia.PHP, Competencia.LARAVEL, Competencia.SWAGGER] as ArrayList,
             "22334455660", 24
-        ))
+        )
 
-        app.addCandidato(new Candidato(
-            "Rafael Costa", "rafael@email.com", "RS", "90000-000",
+        app.addCandidato("Rafael Costa", "rafael@email.com", "RS", "90000-000",
             "Backend Developer", [Competencia.DOTNET, Competencia.MICRONAUT, Competencia.POSTGRESQL] as ArrayList,
             "33445566770", 29
-        ))
+        )
 
-        app.addEmpresa(new Empresa(
-            "Tech Solutions", "contato@techsolutions.com", "SP", "01001-000",
-            "Consultoria em Tecnologia", [Competencia.JAVA, Competencia.SPRING_BOOT] as ArrayList,
-            "12345678000100", "Brasil"
-        ))
+        app.addEmpresa("Tech Solutions", "contato@techsolutions.com", "SP", "01001-000",
+            "Consultoria em Tecnologia", "12345678000100", "Brasil"
+        )
+        app.addVaga(1, "Programador Java Pleno", [Competencia.JAVA, Competencia.DOCKER, Competencia.SPRING_BOOT] as ArrayList)
+        app.addVaga(1, "Programador Junior .NET", [Competencia.DOTNET, Competencia.SWAGGER] as ArrayList)
+        app.addCurtida(1, 1, 1)
+        app.reciprocarCurtida(1, 1)
 
-        app.addEmpresa(new Empresa(
-            "DataCorp", "vendas@datacorp.com", "RJ", "20001-000",
-            "Análise de Dados e BI", [Competencia.PYTHON, Competencia.KAFKA] as ArrayList,
-            "98765432000100", "Brasil"
-        ))
+        app.addEmpresa("DataCorp", "vendas@datacorp.com", "RJ", "20001-000",
+            "Análise de Dados e BI","98765432000100", "Brasil"
+        )
 
-        app.addEmpresa(new Empresa(
-            "DevOps Inc", "info@devopsinc.com", "MG", "30001-000",
-            "Serviços DevOps", [Competencia.DOCKER, Competencia.JENKINS, Competencia.LINUX] as ArrayList,
-            "11223344000100", "Brasil"
-        ))
+        app.addEmpresa("DevOps Inc", "info@devopsinc.com", "MG", "30001-000",
+            "Serviços DevOps", "11223344000100", "Brasil"
+        )
 
-        app.addEmpresa(new Empresa(
-            "Web Creators", "contato@webcreators.com", "SP", "01002-000",
-            "Desenvolvimento Frontend", [Competencia.PHP, Competencia.LARAVEL, Competencia.SWAGGER] as ArrayList,
-            "22334455000100", "Brasil"
-        ))
+        app.addEmpresa("Web Creators", "contato@webcreators.com", "SP", "01002-000",
+            "Desenvolvimento Frontend", "22334455000100", "Brasil"
+        )
 
-        app.addEmpresa(new Empresa(
-            "Backend Solutions", "contato@backend.com", "RS", "90001-000",
-            "Soluções Backend", [Competencia.DOTNET, Competencia.MICRONAUT, Competencia.POSTGRESQL] as ArrayList,
-            "33445566000100", "Brasil"
-        ))
+        app.addEmpresa("Backend Solutions", "contato@backend.com", "RS", "90001-000",
+            "Soluções Backend", "33445566000100", "Brasil"
+        )
         // ============= //
 
         def appInput = ""
@@ -81,6 +71,10 @@ class Main {
                         "2 - Listar Empresas \n" +
                         "3 - Adicionar Candidato \n" +
                         "4 - Adicionar Empresa\n" +
+                        "5 - Adicionar vaga a uma empresa\n" +
+                        "6 - Curtir vaga como candidato\n" +
+                        "7 - Curtir candidato como empresa\n" +
+                        "8 - Listar matches de uma vaga\n" +
                         "q - Sair da Aplicacao\n"
 
                 appInput = appScanner.nextLine()
@@ -88,9 +82,11 @@ class Main {
                     case "1":
                         app.getListaCandidatos().each { println it }
                         break
+
                     case "2":
-                        println app.getListaEmpresas().each { println it }
+                        app.getListaEmpresas().each { println it }
                         break
+
                     case "3":
                         println "Nome: "
                         String nomeCandidato = appScanner.nextLine()
@@ -105,12 +101,11 @@ class Main {
                         ArrayList<Competencia> competenciasCandidato = lerCompetencia(appScanner)
                         println "CPF: "
                         String cpfCandidato = appScanner.nextLine()
-                        int idadeCandidato = lerIdade(appScanner)
-
-                        app.addCandidato(new Candidato(nomeCandidato, emailCandidato, estadoCandidato, cepCandidato, descricaoCandidato, competenciasCandidato, cpfCandidato, idadeCandidato))
+                        int idadeCandidato = lerInteiroPositivo(appScanner, 'Idade: ')
+                        app.addCandidato(nomeCandidato, emailCandidato, estadoCandidato, cepCandidato, descricaoCandidato, competenciasCandidato, cpfCandidato, idadeCandidato)
                         println "Candidato Adicionado com sucesso"
-
                         break
+
                     case "4":
                         println "Nome: "
                         String nomeEmpresa = appScanner.nextLine()
@@ -122,19 +117,83 @@ class Main {
                         String cepEmpresa = appScanner.nextLine()
                         println "Descricao: "
                         String descricaoEmpresa = appScanner.nextLine()
-                        ArrayList<Competencia> competenciasEmpresa = lerCompetencia(appScanner)
-
                         println "CNPJ: "
                         String cnpjEmpresa = appScanner.nextLine()
                         println "Pais: "
                         String paisEmpresa = appScanner.nextLine()
-                        app.addEmpresa(new Empresa(nomeEmpresa, emailEmpresa, estadoEmpresa, cepEmpresa, descricaoEmpresa, competenciasEmpresa, cnpjEmpresa, paisEmpresa))
+                        app.addEmpresa(nomeEmpresa, emailEmpresa, estadoEmpresa, cepEmpresa, descricaoEmpresa, cnpjEmpresa, paisEmpresa)
                         println "Empresa Adicionada com sucesso"
+                        break
 
+                    case "5":
+                        int idEmpresa = lerId(appScanner, app.getIdEmpresasAtual())
+                        println "Nome da vaga: "
+                        String nomeVaga = appScanner.nextLine()
+                        ArrayList<Competencia> competenciasVagas = lerCompetencia(appScanner)
+                        app.addVaga(idEmpresa, nomeVaga, competenciasVagas)
+                        println "Vaga Adicionada com sucesso"
+                        break
+
+                    case "6":
+                        app.getListaCandidatos().each { println it }
+                        int idCandidato = lerId(appScanner, app.getIdCandidatosAtual())
+
+                        int idEmpresa = lerId(appScanner, app.getIdEmpresasAtual())
+                        HashMap<Integer, Vaga> listaVagas = app.getVagasEmpresa(idEmpresa)
+                        if(!listaVagas){
+                            println "Essa empresa nao possui vagas"
+                            break
+                        }
+                        listaVagas.each {println it.value}
+
+                        int idVaga = lerId(appScanner, app.getIdVagaAtual())
+
+                        app.addCurtida(idCandidato, idEmpresa, idVaga)
+                        println "Curtida adicionada com sucesso"
+                        break
+
+                    case "7":
+                        int idEmpresa = lerId(appScanner, app.getIdEmpresasAtual())
+                        HashMap<Integer, Vaga> listaVagas = app.getVagasEmpresa(idEmpresa)
+                        if(!listaVagas){
+                            println "Essa empresa nao possui vagas"
+                            break
+                        }
+                        listaVagas.each {println it}
+
+                        int idVaga = lerId(appScanner, app.getIdVagaAtual())
+                        HashMap<Integer, Curtida> listaCurtidas = app.getCurtidasVaga(idEmpresa, idVaga)
+                        if(!listaCurtidas){
+                            println "Essa vaga nao possui curtidas"
+                            break
+                        }
+                        listaCurtidas.each() {println it}
+                        int idCurtida = lerIdCurtida(appScanner, listaCurtidas)
+                        app.reciprocarCurtida(idEmpresa, idCurtida)
+                        println "Candidato curtido com sucesso"
+                        break
+                    case "8":
+                        int idEmpresa = lerId(appScanner, app.getIdEmpresasAtual())
+                        HashMap<Integer, Vaga> listaVagas = app.getVagasEmpresa(idEmpresa)
+                        if(!listaVagas){
+                            println "Essa empresa nao possui vagas"
+                            break
+                        }
+                        listaVagas.each {println it.value}
+                        int idVaga = lerId(appScanner, app.getIdVagaAtual())
+                        HashMap<Integer, Curtida> listaMatches = app.getCurtidasVaga(idEmpresa, idVaga).findAll() {it.value.empresa != null} as HashMap
+                        if(!listaMatches){
+                            println "Essa vaga nao possui matches"
+                            break
+                        }
+                        listaMatches.each {
+                            println "Vaga ID $it.value.vaga.id da Empresa ID $it.value.empresa.id -> Match com o Candidato ID $it.value.candidato.id"
+                        }
                         break
                     case "q":
                         println "Saindo da Aplicacao"
                         return
+
                     default:
                         println "Valor invalido. Tente novamente"
                         break
@@ -145,62 +204,68 @@ class Main {
         }
     }
 
-    private static int lerIdade(Scanner appScanner) {
-        int idade
-        while (true) {
-            println "Idade: "
+    private static int lerIdCurtida(Scanner appScanner, HashMap<Integer, Curtida> listaCurtidas){
+        while(true){
             try {
-                idade = appScanner.nextLine().toInteger()
+                int idCurtida = lerInteiroPositivo(appScanner, 'Id da curtida: ')
+                if(!listaCurtidas.get(idCurtida)) throw new Exception()
+                return idCurtida
+            } catch(Exception ignored){
+                println "Id invalido. Tente novamente"
+            }
+        }
+    }
+
+    private static int lerId(Scanner appScanner, int maxValue){
+        while(true){
+            try {
+                int id = lerInteiroPositivo(appScanner, 'Id da empresa: ')
+                if(id <= 0 || id > maxValue) {
+                    throw new Exception()
+                }
+                return id
+            } catch(Exception ignored){
+                println "Id invalido. Tente novamente"
+            }
+        }
+
+    }
+
+    private static int lerInteiroPositivo(Scanner appScanner, String mensagem) {
+        int num
+        while (true) {
+            println mensagem
+            try {
+                num = appScanner.nextLine().toInteger()
+                if(num <= 0) throw new Exception()
                 break
             } catch (Exception ignored) {
                 println "Valor invalido. Tente novamente"
             }
         }
-        return idade
+        return num
     }
 
     private static ArrayList<Competencia> lerCompetencia(Scanner appScanner) {
         Set<Competencia> competencias = new LinkedHashSet<>()
         while (true) {
-            println "Adicionar Competencias: \n" +
-                    "1: Java\n" +
-                    "2: Python\n" +
-                    "3: C sharp\n" +
-                    "4: Spring boot\n" +
-                    "5: Php\n" +
-                    "6: Laravel\n" +
-                    "7: Docker\n" +
-                    "8: Jenkins\n" +
-                    "9: Postgresql\n" +
-                    "10: Mysql\n" +
-                    "11: Swagger\n" +
-                    "12: Kafka\n" +
-                    "13: Micronaut\n" +
-                    "14: Linux\n" +
-                    "15: Dotnet\n" +
-                    "f: Finalizar"
+            println "Adicionar Competencias: "
+            Competencia.values().eachWithIndex { comp, i ->
+                println "${i + 1}: ${comp.name().replace("_", " ").capitalize()}"
+            }
+            println "f: Finalizar"
 
-            String inputCompetencia = appScanner.nextLine()
+            String input = appScanner.nextLine()
+            if (input == "f") {
+                return new ArrayList<>(competencias)
+            }
 
-            switch (inputCompetencia) {
-                case "1": competencias.add(Competencia.JAVA); break
-                case "2": competencias.add(Competencia.PYTHON); break
-                case "3": competencias.add(Competencia.C_SHARP); break
-                case "4": competencias.add(Competencia.SPRING_BOOT); break
-                case "5": competencias.add(Competencia.PHP); break
-                case "6": competencias.add(Competencia.LARAVEL); break
-                case "7": competencias.add(Competencia.DOCKER); break
-                case "8": competencias.add(Competencia.JENKINS); break
-                case "9": competencias.add(Competencia.POSTGRESQL); break
-                case "10": competencias.add(Competencia.MYSQL); break
-                case "11": competencias.add(Competencia.SWAGGER); break
-                case "12": competencias.add(Competencia.KAFKA); break
-                case "13": competencias.add(Competencia.MICRONAUT); break
-                case "14": competencias.add(Competencia.LINUX); break
-                case "15": competencias.add(Competencia.DOTNET); break
-                case "f":
-                    return new ArrayList<>(competencias)
-                default: println "Opção inválida"; break
+            try {
+                int indice = input.toInteger() - 1
+                Competencia selecionada = Competencia.values()[indice]
+                competencias.add(selecionada)
+            } catch (Exception ignored) {
+                println "Valor invalido. Tente novamente"
             }
         }
     }

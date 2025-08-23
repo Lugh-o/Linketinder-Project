@@ -4,6 +4,8 @@ Uma aplicação que mescla as funcionalidades do Linkedin e do Tinder, para Cand
 
 ## Funcionalidades
 - Criação e Leitura de Candidatos e Empresas
+- Empresas podem ter vagas
+- Likes e matches de vagas entre empresas e candidatos
 
 ## Requisitos
 - Java 8+

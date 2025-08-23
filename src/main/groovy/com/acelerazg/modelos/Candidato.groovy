@@ -1,11 +1,14 @@
 package com.acelerazg.modelos
 
-class Candidato extends Pessoa {
+import com.acelerazg.traits.temCompetencias
+
+class Candidato extends Pessoa implements temCompetencias{
     private String cpf
     private int idade
 
-    Candidato(String nome, String email, String estado, String cep, String descricao, ArrayList<Competencia> competencias, String cpf, int idade) {
-        super(nome, email, estado, cep, descricao, competencias)
+    Candidato(int id, String nome, String email, String estado, String cep, String descricao, ArrayList<Competencia> competencias, String cpf, int idade) {
+        super(id, nome, email, estado, cep, descricao)
+        this.competencias = competencias
         this.cpf = cpf
         this.idade = idade
     }
@@ -30,8 +33,9 @@ class Candidato extends Pessoa {
     String toString() {
         return "Candidato{" +
                 super.toString() +
-                ". cpf='" + cpf + '\'' +
-                ", idade=" + idade +
+                ", cpf='$cpf'" +
+                ", idade='$idade'" +
+                ", competencias='" + Arrays.toString(competencias) + "'" +
                 '}'
     }
 }
