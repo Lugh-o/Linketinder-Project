@@ -7,9 +7,9 @@ import com.acelerazg.modelos.Empresa
 import com.acelerazg.modelos.Vaga
 
 class Linketinder {
-    private HashMap<Integer, Candidato> listaCandidatos
-    private HashMap<Integer,Empresa> listaEmpresas
-    private HashMap<Integer,Curtida> listaCurtidas
+    HashMap<Integer, Candidato> listaCandidatos
+    HashMap<Integer,Empresa> listaEmpresas
+    HashMap<Integer,Curtida> listaCurtidas
     int idCandidatosAtual = 1
     int idEmpresasAtual = 1
     int idVagaAtual = 1
@@ -67,37 +67,5 @@ class Linketinder {
         Empresa empresa = listaEmpresas.get(idEmpresa)
         if(!empresa) return null
         return empresa.getListaVagas()
-    }
-
-    HashMap<Integer, Candidato> getListaCandidatos() {
-        return listaCandidatos
-    }
-
-    HashMap<Integer, Empresa> getListaEmpresas() {
-        return listaEmpresas
-    }
-
-    HashMap<Integer, Curtida> getListaCurtidas() {
-        return listaCurtidas
-    }
-
-    int getIdVagaAtual() {
-        return idVagaAtual
-    }
-
-    int getIdEmpresasAtual() {
-        return idEmpresasAtual
-    }
-
-    int getIdCandidatosAtual() {
-        return idCandidatosAtual
-    }
-
-    int getIdCurtidaAtual() {
-        return idCurtidaAtual
-    }
-
-    void setIdCurtidaAtual(int idCurtidaAtual) {
-        this.idCurtidaAtual = idCurtidaAtual
     }
 }

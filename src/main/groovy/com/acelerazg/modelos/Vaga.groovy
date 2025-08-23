@@ -1,35 +1,16 @@
 package com.acelerazg.modelos
 
 import com.acelerazg.traits.temCompetencias
+import groovy.transform.ToString
 
-class Vaga implements temCompetencias{
-    private final int id
-    private String nome
+@ToString(includeSuperProperties = true, includePackage = false, includeNames = true)
+class Vaga implements temCompetencias {
+    final int id
+    String nome
 
     Vaga (int id, String nome, ArrayList<Competencia> competencias) {
         this.id = id
         this.nome = nome
         this.competencias = competencias
-    }
-
-    int getId() {
-        return id
-    }
-
-    String getNome() {
-        return nome
-    }
-
-    void setNome(String nome) {
-        this.nome = nome
-    }
-
-    @Override
-    String toString() {
-        return "Vaga{" +
-                "id='$id'" +
-                ", nome='$nome'" +
-                ", competencias='" + Arrays.toString(competencias) + "'" +
-                '}';
     }
 }
