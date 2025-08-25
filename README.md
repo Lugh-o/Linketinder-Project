@@ -28,5 +28,11 @@ Para rodar:
 ```
 java -jar build/libs/Linketinder-Project-1.0-SNAPSHOT.jar
 ```
+
+Para executar os testes unitários:
+```
+./gradlew test
+```
+
 ## Licença
 Este projeto é livre para uso pessoal e acadêmico.  Sinta-se à vontade para clonar, modificar e melhorar.
