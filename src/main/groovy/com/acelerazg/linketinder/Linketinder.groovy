@@ -2,6 +2,10 @@ package com.acelerazg.linketinder
 
 import com.acelerazg.modelos.*
 
+/**
+ * Classe principal do sistema Linketinder, responsável por gerenciar candidatos, empresas, vagas e curtidas.
+ *
+ */
 class Linketinder {
     HashMap<Integer, Candidato> listaCandidatos
     HashMap<Integer, Empresa> listaEmpresas

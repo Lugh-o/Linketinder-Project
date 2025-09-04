@@ -3,6 +3,13 @@ package com.acelerazg.factory
 import com.acelerazg.linketinder.Linketinder
 import com.acelerazg.modelos.Competencia
 
+/**
+ * Classe factory para popular uma instância do aplicativo Linketinder com dados de exemplo.
+ *
+ * <p>Possui metodo estático para adicionar candidatos,
+ * empresas, vagas e curtidas pré-definidas para testes.</p>
+ *
+ */
 class LinketinderFactory {
     static void generateData(Linketinder app) {
         app.addCandidato(

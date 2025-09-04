@@ -6,7 +6,12 @@ import com.acelerazg.modelos.Competencia
 import com.acelerazg.modelos.Curtida
 import com.acelerazg.modelos.Vaga
 
-// Feito por Lucas Carneiro Falcao
+/**
+ * Classe principal do aplicativo Linketinder.
+ * Responsável por exibir o menu, ler entradas do usuário e gerenciar candidatos, empresas e vagas.
+ *
+ * Feito por Lucas Carneiro Falcao
+ */
 class Main {
     static void main(String[] args) {
         println "Bem vindo ao Linketinder!"
@@ -224,7 +229,14 @@ class Main {
         }
         return num
     }
-
+    
+    /**
+     * Lê competências do usuário.
+     * Permite múltiplas seleções até o usuário digitar "f".
+     *
+     * @param appScanner Scanner para ler a entrada
+     * @return Lista de competências selecionadas
+     */
     private static ArrayList<Competencia> lerCompetencia(Scanner appScanner) {
         Set<Competencia> competencias = new LinkedHashSet<>()
         while (true) {
