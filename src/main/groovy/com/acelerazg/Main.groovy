@@ -38,47 +38,35 @@ class Main {
                         break
 
                     case "3":
-                        println "Nome: "
-                        String nomeCandidato = appScanner.nextLine()
-                        println "Email: "
-                        String emailCandidato = appScanner.nextLine()
-                        println "Estado: "
-                        String estadoCandidato = appScanner.nextLine()
-                        println "CEP: "
-                        String cepCandidato = appScanner.nextLine()
-                        println "Descricao: "
-                        String descricaoCandidato = appScanner.nextLine()
+                        String nomeCandidato = lerStringNaoVazia(appScanner, "Nome: ", "O nome do candidato nao pode ser vazio.")
+                        String emailCandidato = lerStringNaoVazia(appScanner, "Email: ", "O email do candidato nao pode ser vazio.")
+                        String estadoCandidato = lerStringNaoVazia(appScanner, "Estado: ", "O estado do candidato nao pode ser vazio.")
+                        String cepCandidato = lerCep(appScanner)
+                        String descricaoCandidato = lerStringNaoVazia(appScanner, "Descricao: ", "A descricaoo do candidato nao pode ser vazia.")
                         ArrayList<Competencia> competenciasCandidato = lerCompetencia(appScanner)
-                        println "CPF: "
-                        String cpfCandidato = appScanner.nextLine()
+                        String cpfCandidato = lerCpf(appScanner)
                         int idadeCandidato = lerInteiroPositivo(appScanner, 'Idade: ')
+
                         app.addCandidato(nomeCandidato, emailCandidato, estadoCandidato, cepCandidato, descricaoCandidato, competenciasCandidato, cpfCandidato, idadeCandidato)
                         println "Candidato Adicionado com sucesso"
                         break
 
                     case "4":
-                        println "Nome: "
-                        String nomeEmpresa = appScanner.nextLine()
-                        println "Email: "
-                        String emailEmpresa = appScanner.nextLine()
-                        println "Estado: "
-                        String estadoEmpresa = appScanner.nextLine()
-                        println "CEP: "
-                        String cepEmpresa = appScanner.nextLine()
-                        println "Descricao: "
-                        String descricaoEmpresa = appScanner.nextLine()
-                        println "CNPJ: "
-                        String cnpjEmpresa = appScanner.nextLine()
-                        println "Pais: "
-                        String paisEmpresa = appScanner.nextLine()
+                        String nomeEmpresa = lerStringNaoVazia(appScanner, "Nome: ", "O nome da empresa nao pode ser vazio.")
+                        String emailEmpresa = lerStringNaoVazia(appScanner, "Email: ", "O email da empresa nao pode ser vazio.")
+                        String estadoEmpresa = lerStringNaoVazia(appScanner, "Estado: ", "O estado da empresa nao pode ser vazio.")
+                        String cepEmpresa = lerCep(appScanner)
+                        String descricaoEmpresa = lerStringNaoVazia(appScanner, "Descricao: ", "A descricao da empresa nao pode ser vazia.")
+                        String cnpjEmpresa = lerCnpj(appScanner)
+                        String paisEmpresa = lerStringNaoVazia(appScanner, "Pais: ", "O pais da empresa nao pode ser vazio.")
+
                         app.addEmpresa(nomeEmpresa, emailEmpresa, estadoEmpresa, cepEmpresa, descricaoEmpresa, cnpjEmpresa, paisEmpresa)
                         println "Empresa Adicionada com sucesso"
                         break
 
                     case "5":
                         int idEmpresa = lerId(appScanner, app.getListaEmpresas(), "Id Empresa:")
-                        println "Nome da vaga: "
-                        String nomeVaga = appScanner.nextLine()
+                        String nomeVaga = lerStringNaoVazia(appScanner, "Nome da Vaga: ", "O nome da vaga nao pode ser vazia.")
                         ArrayList<Competencia> competenciasVagas = lerCompetencia(appScanner)
                         app.addVaga(idEmpresa, nomeVaga, competenciasVagas)
                         println "Vaga Adicionada com sucesso"
@@ -90,11 +78,11 @@ class Main {
 
                         int idEmpresa = lerId(appScanner, app.getListaEmpresas(), "Id Empresa:")
                         HashMap<Integer, Vaga> listaVagas = app.getVagasEmpresa(idEmpresa)
-                        if(!listaVagas){
+                        if (!listaVagas) {
                             println "Essa empresa nao possui vagas"
                             break
                         }
-                        listaVagas.each {println it.value}
+                        listaVagas.each { println it.value }
 
                         int idVaga = lerId(appScanner, app.getVagasEmpresa(idEmpresa), "Id Vaga: ")
 
@@ -105,19 +93,19 @@ class Main {
                     case "7":
                         int idEmpresa = lerId(appScanner, app.getListaEmpresas(), "Id Empresa:")
                         HashMap<Integer, Vaga> listaVagas = app.getVagasEmpresa(idEmpresa)
-                        if(!listaVagas){
+                        if (!listaVagas) {
                             println "Essa empresa nao possui vagas"
                             break
                         }
-                        listaVagas.each {println it}
+                        listaVagas.each { println it }
 
                         int idVaga = lerId(appScanner, app.getVagasEmpresa(idEmpresa), "Id Vaga: ")
                         HashMap<Integer, Curtida> listaCurtidas = app.getCurtidasVaga(idEmpresa, idVaga)
-                        if(!listaCurtidas){
+                        if (!listaCurtidas) {
                             println "Essa vaga nao possui curtidas"
                             break
                         }
-                        listaCurtidas.each() {println it}
+                        listaCurtidas.each() { println it }
                         int idCurtida = lerIdCurtida(appScanner, listaCurtidas)
                         app.reciprocarCurtida(idEmpresa, idCurtida)
                         println "Candidato curtido com sucesso"
@@ -125,14 +113,14 @@ class Main {
                     case "8":
                         int idEmpresa = lerId(appScanner, app.getListaEmpresas(), "Id Empresa:")
                         HashMap<Integer, Vaga> listaVagas = app.getVagasEmpresa(idEmpresa)
-                        if(!listaVagas){
+                        if (!listaVagas) {
                             println "Essa empresa nao possui vagas"
                             break
                         }
-                        listaVagas.each {println it.value}
+                        listaVagas.each { println it.value }
                         int idVaga = lerId(appScanner, app.getVagasEmpresa(idEmpresa), "Id Vaga: ")
-                        HashMap<Integer, Curtida> listaMatches = app.getCurtidasVaga(idEmpresa, idVaga).findAll() {it.value.empresa != null} as HashMap
-                        if(!listaMatches){
+                        HashMap<Integer, Curtida> listaMatches = app.getCurtidasVaga(idEmpresa, idVaga).findAll() { it.value.empresa != null } as HashMap
+                        if (!listaMatches) {
                             println "Essa vaga nao possui matches"
                             break
                         }
@@ -154,13 +142,69 @@ class Main {
         }
     }
 
-    private static int lerId(Scanner appScanner, HashMap lista, String mensagem){
-        while(true){
+    private static String lerStringNaoVazia(Scanner scanner, String prompt, String mensagemErro) {
+        while (true) {
+            println prompt
+            String input = scanner.nextLine().trim()
+            if (!input.isEmpty()) return input
+            println mensagemErro
+        }
+    }
+
+    private static String lerCep(Scanner scanner) {
+        String cepRegex = /^\d{5}-\d{3}$/
+        String cep
+
+        while (true) {
+            println "CEP (formato 12345-678):"
+            cep = scanner.nextLine().trim()
+
+            if (cep ==~ cepRegex) {
+                return cep
+            } else {
+                println "CEP Invalido. Tente Novamente."
+            }
+        }
+    }
+
+    private static String lerCpf(Scanner scanner) {
+        String cpfRegex = /\d{11}/
+        String cpf
+        while (true) {
+            print "CPF (apenas numeros): "
+            cpf = scanner.nextLine().trim()
+
+            if (cpf.matches(cpfRegex)) {
+                return cpf
+            } else {
+                println "CPF Invalido. Ele deve conter exatamente 11 digitos."
+            }
+        }
+    }
+
+    private static String lerCnpj(Scanner scanner) {
+        String cnpjRegex = /\d{14}/
+        String cnpj
+        while (true) {
+            print "CNPJ (apenas numeros): "
+            cnpj = scanner.nextLine().trim()
+
+            if (cnpj.matches(cnpjRegex)) {
+                return cnpj
+            } else {
+                println "CNPJ Invalido. Ele deve conter exatamente 14 digitos."
+            }
+        }
+    }
+
+
+    private static int lerId(Scanner appScanner, HashMap lista, String mensagem) {
+        while (true) {
             try {
                 int id = lerInteiroPositivo(appScanner, mensagem)
-                if(!lista.get(id)) throw new Exception()
+                if (!lista.get(id)) throw new Exception()
                 return id
-            } catch(Exception ignored){
+            } catch (Exception ignored) {
                 println "Id invalido. Tente novamente"
             }
         }
@@ -172,7 +216,7 @@ class Main {
             println mensagem
             try {
                 num = appScanner.nextLine().toInteger()
-                if(num <= 0) throw new Exception()
+                if (num <= 0) throw new Exception()
                 break
             } catch (Exception ignored) {
                 println "Valor invalido. Tente novamente"

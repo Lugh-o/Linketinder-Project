@@ -8,7 +8,7 @@ class Vaga implements temCompetencias {
     final int id
     String nome
 
-    Vaga (int id, String nome, ArrayList<Competencia> competencias) {
+    Vaga(int id, String nome, ArrayList<Competencia> competencias) {
         this.id = id
         this.nome = nome
         this.competencias = competencias

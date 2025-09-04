@@ -40,7 +40,7 @@ class LinketinderFactory {
         app.reciprocarCurtida(1, 1)
 
         app.addEmpresa("DataCorp", "vendas@datacorp.com", "RJ", "20001-000",
-                "Análise de Dados e BI","98765432000100", "Brasil"
+                "Análise de Dados e BI", "98765432000100", "Brasil"
         )
 
         app.addEmpresa("DevOps Inc", "info@devopsinc.com", "MG", "30001-000",
