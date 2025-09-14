@@ -1,0 +1,30 @@
+.registrationScreen {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	min-height: 100vh;
+	background-color: var(--background-light);
+}
+
+
+
+.registrationTitle {
+	font-size: 64px;
+}
+
+.registrationTitle1 {
+	color: var(--neutral-medium);
+}
+
+.registrationTitle2 {
+	color: var(--neutral-dark);
+}
+
+.registrationTitleContainer {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 0px 30px;
+}

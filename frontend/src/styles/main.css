@@ -1,0 +1,28 @@
+:root {
+	--primary-blue: #007bff;
+	--accent-green: #28a745;
+	--accent-red: #dc3545;
+	--background-light: #f8f9fa;
+	--neutral-dark: #343a40;
+	--neutral-medium: #6c757d;
+	--neutral-light: #e9ecef;
+}
+
+* {
+	margin: 0px;
+	padding: 0px;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+*::-webkit-scrollbar {
+	display: none;
+}
+
+html,
+body {
+	height: 100%;
+	overflow: hidden;
+	background-color: var(--Alice-Blue);
+}

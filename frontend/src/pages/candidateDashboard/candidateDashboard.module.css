@@ -1,0 +1,10 @@
+.jobListContainer {
+	max-width: 90vw;
+	margin: 20px auto;
+	display: grid;
+	gap: 50px;
+	grid-template-columns: repeat(auto-fit, minmax(325px, 1fr));
+	justify-items: center;
+	overflow-y: auto;
+	height: 85dvh;
+}

@@ -1,0 +1,77 @@
+.formContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	background-color: var(--neutral-light);
+	height: 100vh;
+	width: clamp(380px, 80%, 600px);
+}
+
+.formArea {
+	display: flex;
+	justify-content: center;
+	align-items: start;
+	overflow-y: scroll;
+	max-height: 90vh;
+	padding-bottom: 20px;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 1rem;
+	max-width: 400px;
+	width: 100%;
+}
+
+.formField {
+	display: flex;
+	flex-direction: column;
+}
+
+input,
+select {
+	padding: 0.5rem;
+	border: 1px solid var(--neutral-medium);
+	border-radius: 4px;
+}
+
+button {
+	color: white;
+	padding: 0.5rem 1rem;
+	border-radius: 6px;
+	cursor: pointer;
+	color: var(--neutral-dark);
+	background-color: var(--neutral-light);
+	border: none;
+	box-shadow: 0px 2px 0px #0000004f;
+}
+
+button:hover {
+	color: var(--neutral-dark);
+	background-color: var(--neutral-light);
+	box-shadow: 0px 2px 0px #007bff;
+	transition-property: "box-shadow";
+	transition-duration: 1s;
+}
+
+.errorMessage {
+	color: var(--accent-red);
+	font-size: 0.8rem;
+	margin-top: 0.2rem;
+}
+
+.competencyListWrapper {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: 150px;
+	align-content: flex-start;
+	gap: 5px;
+}
+
+.checkboxWrapper {
+	display: flex;
+	gap: 5px;
+}

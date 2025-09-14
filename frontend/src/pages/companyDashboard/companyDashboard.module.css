@@ -1,0 +1,30 @@
+.companyDashboardContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.candidateListContainer {
+	max-width: 90vw;
+	margin: 20px auto;
+	display: grid;
+	gap: 50px;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	justify-items: center
+}
+
+.canvaContainer {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	height: 400px;
+}
+
+canvas {
+	max-width: 90vw;
+}
+
+.scrollableContainer {
+	overflow-y: auto;
+	height: 90vh;
+}

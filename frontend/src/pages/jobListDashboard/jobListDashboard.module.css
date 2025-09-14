@@ -1,0 +1,81 @@
+.newJobButtonWrapper {
+	display: flex;
+	justify-content: center;
+	margin-top: 20px;
+}
+
+.jobListContainer {
+	max-width: 90vw;
+	margin: 20px auto;
+	display: grid;
+	gap: 50px;
+	grid-template-columns: repeat(auto-fit, minmax(325px, 1fr));
+	justify-items: center;
+	overflow-y: auto;
+	height: 85dvh;
+}
+
+.createNewJobButton {
+	display: flex;
+	align-content: center;
+	justify-content: center;
+	gap: 10px;
+	background-color: var(--neutral-medium);
+	color: var(--background-light);
+	box-shadow: none;
+}
+
+.createNewJobButton:hover {
+	background-color: #4e555a;
+	color: var(--background-light);
+	transition: none;
+	box-shadow: none;
+}
+
+.createNewJobButton span {
+	display: flex;
+	align-content: center;
+	justify-content: center;
+	margin-top: 2px;
+	font-size: 16px;
+}
+
+.createJobModalOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
+
+.createJobModal {
+	background-color: var(--neutral-light);
+	padding: 20px;
+	border-radius: 15px;
+	min-width: 370px;
+}
+
+.competencyListWrapper {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: 130px;
+	align-content: flex-start;
+	gap: 5px;
+}
+
+.createJobTitle {
+	text-align: center;
+	margin-bottom: 20px;
+	font-size: 32px;
+}
+
+.competencyCheck {
+	display: flex;
+	gap: 5px;
+}

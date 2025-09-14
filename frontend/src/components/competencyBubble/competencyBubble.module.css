@@ -1,0 +1,7 @@
+.competencyBubble {
+	background-color: var(--neutral-light);
+	padding: 5px 15px;
+	border-radius: 20px;
+	color: var(--primary-blue);
+	font-size: 14px;
+}

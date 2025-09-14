@@ -1,7 +1,10 @@
-import './styles/main.css';
-import { initApp } from './app';
+import "./styles/main.css";
 
-const appContainer = document.getElementById('app');
+import { registrationScreen } from "./pages/registrationScreen/registrationScreen";
+
+const appContainer: HTMLBodyElement | null = document.querySelector("body");
+
 if (appContainer) {
-  appContainer.appendChild(initApp());
+	appContainer.innerHTML = "";
+	appContainer.appendChild(registrationScreen());
 }
