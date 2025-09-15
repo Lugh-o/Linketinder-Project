@@ -26,11 +26,11 @@ export function registrationFormCompany(): HTMLElement {
 			pattern: "\\d{5}-?\\d{3}",
 		},
 		{
-			label: "CNPJ (14 digitos)",
+			label: "CNPJ (12.123.123/1234-12)",
 			type: "text",
 			name: "cnpj",
 			required: true,
-			pattern: "\\d{14}",
+			pattern: "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}",
 		},
 		{
 			label: "Descrição",

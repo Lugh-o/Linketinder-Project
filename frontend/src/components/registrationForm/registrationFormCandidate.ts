@@ -59,18 +59,18 @@ export function createCandidateForm(): HTMLElement {
 		{ label: "Email", type: "email", name: "email", required: true },
 		{ label: "Estado", type: "text", name: "state", required: true },
 		{
-			label: "CEP (12345-678)",
+			label: "CEP (12345-123)",
 			type: "text",
 			name: "cep",
 			required: true,
 			pattern: "\\d{5}-?\\d{3}",
 		},
 		{
-			label: "CPF (11 digitos)",
+			label: "CPF (123.123.123-12)",
 			type: "text",
 			name: "cpf",
 			required: true,
-			pattern: "\\d{11}",
+			pattern: "(\\d{3}.?){2}\\d{3}-?\\d{2}",
 		},
 		{
 			label: "Idade",

@@ -49,6 +49,7 @@ export function jobListDashboard(company: Company): HTMLDivElement {
 		nameInput.className = styles.jobNameInput;
 		nameInput.type = "text";
 		nameInput.required = true;
+		nameInput.minLength = 3;
 
 		form.appendChild(nameLabel);
 		form.appendChild(nameInput);
@@ -60,6 +61,7 @@ export function jobListDashboard(company: Company): HTMLDivElement {
 			document.createElement("textarea");
 		descriptionInput.className = styles.jobNameInput;
 		descriptionInput.required = true;
+		descriptionInput.minLength = 3;
 
 		form.appendChild(descriptionLabel);
 		form.appendChild(descriptionInput);
