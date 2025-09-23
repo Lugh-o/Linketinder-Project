@@ -16,7 +16,7 @@ export function jobCard(job: Job, person: Person): HTMLDivElement {
 	container.className = styles.container;
 
 	const firstColumn: HTMLDivElement = document.createElement("div");
-	firstColumn.className = styles.fistColumn;
+	firstColumn.className = styles.firstColumn;
 
 	const nameAfinittyWrapper: HTMLDivElement = document.createElement("div");
 

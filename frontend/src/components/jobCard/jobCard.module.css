@@ -3,7 +3,7 @@
 	flex-direction: row;
 	justify-content: space-between;
 	width: 300px;
-	height: clamp(200px, min-content, 400px);
+	height: clamp(50px, 30vh, 300px);
 	padding: 20px;
 	background-color: var(--background-light);
 	border-radius: 20px;
@@ -72,10 +72,11 @@
 	background-color: #b62a38;
 }
 
-.fistColumn {
+.firstColumn {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
+	width: 100%;
 }
 
 .affinityContainer {

@@ -162,7 +162,6 @@ export function createCandidateForm(): HTMLElement {
 			inputMap["graduation"].value,
 			selectedCompetencies
 		);
-		console.log(candidate);
 
 		store.addCandidate(candidate);
 		navigateTo(candidateDashboard(candidate));
