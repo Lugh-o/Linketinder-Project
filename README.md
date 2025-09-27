@@ -1,6 +1,6 @@
 # Linketinder
 
-Uma aplicação que mescla as funcionalidades do Linkedin e do Tinder, para Candidatos darem Match com empresas. Atualmente possui um backend e um frontend isolado, cada um com funcionalidades parciais.
+Uma aplicação que mescla as funcionalidades do Linkedin e do Tinder, para Candidatos darem Match com empresas. Atualmente possui um backend e um frontend isolado, cada um com funcionalidades parciais, além de um banco de dados em PostegreSQL ainda não integrado ao backend.
 
 ## Funcionalidades
 
@@ -45,11 +45,12 @@ Para executar os testes unitários:
 
 ### Requisitos
 
-- Node.Js 20.19+
+-   Node.Js 20.19+
 
 ### Como executar
 
 Após o clone, entre na pasta:
+
 ```
 cd Linketinder-Project/frontend
 ```
@@ -61,11 +62,18 @@ npm install
 ```
 
 Para executar:
+
 ```
 npm run preview
 ```
 
 Então a aplicação será servida em http://localhost:4173/
+
+## Modelo do Banco de Dados
+
+Modelo do banco de dados utilizando a plataforma [dbdiagram](https://dbdiagram.io).
+
+<img src="./MERDER.png" width="900">
 
 ## Licença
 
