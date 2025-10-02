@@ -1,5 +1,0 @@
-package com.acelerazg.modelos
-
-enum Competencia {
-    JAVA, PYTHON, C_SHARP, SPRING_BOOT, PHP, LARAVEL, DOCKER, JENKINS, POSTGRESQL, MYSQL, SWAGGER, KAFKA, MICRONAUT, LINUX, DOTNET
-}

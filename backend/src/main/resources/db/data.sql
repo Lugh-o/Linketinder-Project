@@ -26,7 +26,7 @@ INSERT INTO company (name, id_person, cnpj) VALUES
 ('FinançasMax', 4, '55.666.777/0001-88'),
 ('GreenAgro', 5, '22.333.444/0001-55');
 
-INSERT INTO candidate (first_name, last_name, id_person, cpf, date_of_birth, graduation) VALUES
+INSERT INTO candidate (first_name, last_name, id_person, cpf, birthday, graduation) VALUES
 ('João', 'Silva', 6, '111.222.333-44', '1995-06-10', 'Engenharia da Computação'),
 ('Maria', 'Oliveira', 7, '555.666.777-88', '1993-04-22', 'Estatística'),
 ('Carlos', 'Souza', 8, '999.000.111-22', '1990-12-01', 'Ciência da Computação'),
@@ -40,26 +40,26 @@ INSERT INTO job (name, description, id_company, id_address) VALUES
 ('Consultor Financeiro', 'Vaga de consultor', 4, 4),
 ('Desenvolvedor Frontend', 'Vaga de frontend', 5, 5);
 
-INSERT INTO candidate_like (id_candidate, id_job) VALUES
-(1,1),
-(2,2),
-(3,3),
-(4,4),
-(5,5);
+-- INSERT INTO candidate_like (id_candidate, id_job) VALUES
+-- (1,1),
+-- (2,2),
+-- (3,3),
+-- (4,4),
+-- (5,5);
 
-INSERT INTO company_like (id_company, id_candidate) VALUES
-(1,1),
-(2,2),
-(3,3),
-(4,4),
-(5,5);
+-- INSERT INTO company_like (id_company, id_candidate) VALUES
+-- (1,1),
+-- (2,2),
+-- (3,3),
+-- (4,4),
+-- (5,5);
 
-INSERT INTO match_event (id_job, id_candidate) VALUES
-(1,1),
-(2,2),
-(3,3),
-(4,4),
-(5,5);
+-- INSERT INTO match_event (id_job, id_candidate) VALUES
+-- (1,1),
+-- (2,2),
+-- (3,3),
+-- (4,4),
+-- (5,5);
 
 INSERT INTO competency (name) VALUES
 ('JAVA'),

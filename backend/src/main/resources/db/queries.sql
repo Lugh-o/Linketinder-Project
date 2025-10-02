@@ -33,7 +33,7 @@ INNER JOIN candidate cd ON cl.id_candidate = cd.id
 INNER JOIN candidate_competency cc ON cc.id_candidate = cd.id
 INNER JOIN competency ct ON cc.id_competency = ct.id
 INNER JOIN person p ON cd.id_person = p.id
-WHERE cp.id = 1 -- ID DA EMPRESA QUE ESTÁ CONSULTANDO
+WHERE cp.id = 2 -- ID DA EMPRESA QUE ESTÁ CONSULTANDO
 GROUP BY j.id, j.name, cd.graduation, p.description;
 
 -- MATCHES
