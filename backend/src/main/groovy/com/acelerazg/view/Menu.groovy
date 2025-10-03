@@ -246,6 +246,17 @@ class Menu {
                         }
                         anonymousCandidates.forEach { println it }
                         int idCandidate = inputReader.readId(appScanner, anonymousCandidates, "Chose a candidate:")
+                        int response = companyController.handleLikeCandidate(idCompany, idCandidate)
+                        switch (response) {
+                            case 0:
+                                println "This candidate is already matched!"
+                                break
+                            case 1:
+                                println "Like added successfully!"
+                                break
+                            case 2:
+                                println "You Matched successfully with this candidate!"
+                        }
 
                         if (companyController.handleLikeCandidate(idCompany, idCandidate)) {
                             println "Like added successfully!"

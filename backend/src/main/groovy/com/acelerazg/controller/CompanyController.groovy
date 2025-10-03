@@ -48,8 +48,8 @@ class CompanyController {
         return companyDAO.create(company, address)
     }
 
-    boolean handleLikeCandidate(int idCompany, int idCandidate) {
-        if (companyDAO.isCandidateAlreadyLiked(idCompany, idCandidate)) return false
+    int handleLikeCandidate(int idCompany, int idCandidate) {
+        if (companyDAO.isCandidateAlreadyLiked(idCompany, idCandidate)) return 0
 
         companyDAO.likeCandidate(idCompany, idCandidate)
         List<Job> likedJobs = jobDAO.getAllByCompanyId(idCompany)
@@ -57,7 +57,8 @@ class CompanyController {
             if (candidateDAO.hasLikedJob(idCandidate, job.id)) {
                 matchEventDAO.create(job.id, idCandidate)
             }
+            return 2
         }
-        return true
+        return 1
     }
 }
