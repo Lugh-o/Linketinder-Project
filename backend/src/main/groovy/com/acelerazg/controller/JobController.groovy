@@ -8,7 +8,13 @@ import groovy.transform.CompileStatic
 
 @CompileStatic
 class JobController {
-    static Job handleCreateJob(String name, String description, int idCompany, String state, String postalCode, String country, String city, String street, List<Competency> competencies) {
+    private final JobDAO jobDao
+
+    JobController(JobDAO jobDao) {
+        this.jobDao = jobDao
+    }
+
+    Job handleCreateJob(String name, String description, int idCompany, String state, String postalCode, String country, String city, String street, List<Competency> competencies) {
 
         Job job = new Job(
                 name,
@@ -24,10 +30,10 @@ class JobController {
                 street
         )
 
-        return JobDAO.create(job, address, competencies)
+        return jobDao.create(job, address, competencies)
     }
 
-    static List<Job> handleGetAllByCompanyId(int id) {
-        return JobDAO.getAllByCompanyId(id)
+    List<Job> handleGetAllByCompanyId(int id) {
+        return jobDao.getAllByCompanyId(id)
     }
 }

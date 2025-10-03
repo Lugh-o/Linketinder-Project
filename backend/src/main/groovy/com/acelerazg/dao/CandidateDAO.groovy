@@ -12,7 +12,18 @@ import java.time.LocalDate
 
 @CompileStatic
 class CandidateDAO extends DAO {
-    static List<Candidate> getAll() {
+    private final AddressDAO addressDAO
+    private final PersonDAO personDAO
+    private final CompetencyDAO competencyDAO
+
+    CandidateDAO(AddressDAO addressDAO, PersonDAO personDAO, CompetencyDAO competencyDAO) {
+        this.addressDAO = addressDAO
+        this.personDAO = personDAO
+        this.competencyDAO = competencyDAO
+    }
+
+    @SuppressWarnings()
+    List<Candidate> getAll() {
         String sql = """            
             SELECT 
                 c.id as id_candidate, c.first_name, c.last_name, c.cpf, c.birthday, c.graduation,
@@ -50,7 +61,7 @@ class CandidateDAO extends DAO {
         return candidates
     }
 
-    private static Candidate getCandidateGeneric(String sql, def parameter) {
+    private Candidate getCandidateGeneric(String sql, def parameter) {
         Connection connection = null
         PreparedStatement statement = null
         ResultSet response = null
@@ -81,7 +92,7 @@ class CandidateDAO extends DAO {
         return candidate
     }
 
-    static Candidate getById(int id) {
+    Candidate getById(int id) {
         String sql = """            
         SELECT 
             c.id as id_candidate, c.first_name, c.last_name, c.cpf, c.birthday, c.graduation,
@@ -95,7 +106,7 @@ class CandidateDAO extends DAO {
         return getCandidateGeneric(sql, id)
     }
 
-    static Candidate getByEmail(String email) {
+    Candidate getByEmail(String email) {
         String sql = """
                 SELECT 
                     c.id as id_candidate, c.first_name, c.last_name, c.cpf, c.birthday, c.graduation,
@@ -104,12 +115,12 @@ class CandidateDAO extends DAO {
                 FROM candidate c
                 INNER JOIN person p ON c.id_person = p.id
                 INNER JOIN address a ON a.id = p.id_address            
-                WHERE c.id = ?
+                WHERE p.email = ?
         """
         return getCandidateGeneric(sql, email)
     }
 
-    static List<AnonymousCandidateDTO> getAllCandidatesInterestedByJobId(int id) {
+    List<AnonymousCandidateDTO> getAllCandidatesInterestedByJobId(int id) {
         String sql = """
             SELECT 
                 cd.id AS candidate_id,
@@ -153,7 +164,7 @@ class CandidateDAO extends DAO {
         return candidates
     }
 
-    static boolean hasLikedJob(int idCandidate, int idJob) {
+    boolean hasLikedJob(int idCandidate, int idJob) {
         String sql = """
             SELECT * from candidate_like
             WHERE id_candidate = ? AND id_job = ?
@@ -177,7 +188,7 @@ class CandidateDAO extends DAO {
         return false
     }
 
-    static Candidate create(Candidate candidate, Address address, List<Competency> competencies) {
+    Candidate create(Candidate candidate, Address address, List<Competency> competencies) {
         String sql = """
             INSERT INTO candidate (first_name, last_name, id_person, cpf, birthday, graduation) VALUES
             (?, ?, ?, ?, ?, ?);
@@ -191,8 +202,8 @@ class CandidateDAO extends DAO {
             connection = DatabaseHandler.getConnection()
             connection.autoCommit = false
 
-            candidate.idAddress = AddressDAO.create(connection, address)
-            candidate.idPerson = PersonDAO.create(connection, candidate)
+            candidate.idAddress = addressDAO.create(connection, address)
+            candidate.idPerson = personDAO.create(connection, candidate)
 
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
             statement.setString(1, candidate.firstName)
@@ -221,10 +232,10 @@ class CandidateDAO extends DAO {
         return candidate
     }
 
-    static void createCandidateCompetency(Connection connection, int idCandidate, Competency competency) {
-        Competency existing = CompetencyDAO.getByName(connection, competency.name)
+    void createCandidateCompetency(Connection connection, int idCandidate, Competency competency) {
+        Competency existing = competencyDAO.getByName(connection, competency.name)
         if (!existing) {
-            existing = CompetencyDAO.createWithConnection(connection, competency)
+            existing = competencyDAO.createWithConnection(connection, competency)
         }
 
         String sql = "INSERT INTO candidate_competency (id_candidate, id_competency) VALUES (?, ?);"
@@ -239,7 +250,7 @@ class CandidateDAO extends DAO {
         }
     }
 
-    static Candidate update(int id, Candidate candidate, Address address, List<Competency> newCompetencies) {
+    Candidate update(int id, Candidate candidate, Address address, List<Competency> newCompetencies) {
         String sql = """
             UPDATE candidate SET first_name = ?, last_name = ?, cpf = ?, date_of_birth = ?, graduation = ?
             WHERE id = ?
@@ -254,8 +265,8 @@ class CandidateDAO extends DAO {
 
             Candidate currentCandidate = getById(id)
 
-            AddressDAO.update(connection, currentCandidate.idAddress, address)
-            PersonDAO.update(connection, candidate)
+            addressDAO.update(connection, currentCandidate.idAddress, address)
+            personDAO.update(connection, candidate)
             updateCandidateCompetencies(connection, id, newCompetencies)
 
             statement = connection.prepareStatement(sql)
@@ -278,7 +289,7 @@ class CandidateDAO extends DAO {
         return getById(id)
     }
 
-    static void updateCandidateCompetencies(Connection connection, int idCandidate, List<Competency> newCompetencies) {
+    void updateCandidateCompetencies(Connection connection, int idCandidate, List<Competency> newCompetencies) {
         if (newCompetencies == null) return
         String deleteSql = "DELETE FROM candidate_competency WHERE id_candidate = ?"
         PreparedStatement deleteStatement = null
@@ -294,15 +305,41 @@ class CandidateDAO extends DAO {
         }
     }
 
-    static void delete(int id) {
+    void delete(int id) {
         String sql = "DELETE FROM candidate WHERE id = ?"
         deleteGeneric(id, sql)
     }
 
-    static void likeJob(int idCandidate, int jobId) {
+    void likeJob(int idCandidate, int jobId) {
         String sql = """
             INSERT INTO candidate_like (id_candidate, id_job) VALUES (?, ?)
         """
         likeGeneric(idCandidate, jobId, sql)
+    }
+
+    boolean isJobAlreadyLiked(int idCandidate, int idJob) {
+        String sql = """
+            SELECT * FROM candidate_like
+            WHERE id_candidate = ? AND id_job = ?;
+        """
+
+        Connection connection = null
+        PreparedStatement statement = null
+        ResultSet response = null
+
+        try {
+            connection = DatabaseHandler.getConnection()
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+            statement.setInt(1, idCandidate)
+            statement.setInt(2, idJob)
+
+            response = statement.executeQuery()
+            if (response.next()) {
+                return true
+            }
+        } finally {
+            DatabaseHandler.closeQuietly(response, statement, connection)
+        }
+        return false
     }
 }

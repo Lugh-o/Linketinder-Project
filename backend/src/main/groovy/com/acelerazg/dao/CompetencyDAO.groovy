@@ -11,7 +11,7 @@ import java.sql.Statement
 
 @CompileStatic
 class CompetencyDAO extends DAO {
-    static List<Competency> getAll() {
+    List<Competency> getAll() {
         String sql = "SELECT * FROM competency"
 
         Connection connection = null
@@ -35,7 +35,7 @@ class CompetencyDAO extends DAO {
         return competencies
     }
 
-    static Competency getByName(Connection connection, String name) {
+    Competency getByName(Connection connection, String name) {
         String sql = """
             SELECT * from competency c
             WHERE c.name = ?;
@@ -61,7 +61,7 @@ class CompetencyDAO extends DAO {
         return competency
     }
 
-    static Competency create(Competency competency) {
+    Competency create(Competency competency) {
         String sql = "INSERT INTO competency (name) VALUES (?)"
         Connection connection = null
         PreparedStatement statement = null
@@ -89,7 +89,7 @@ class CompetencyDAO extends DAO {
         return competency
     }
 
-    static Competency createWithConnection(Connection connection, Competency competency) {
+    Competency createWithConnection(Connection connection, Competency competency) {
         String sql = "INSERT INTO competency (name) VALUES (?)"
         PreparedStatement statement = null
         ResultSet response = null
@@ -112,7 +112,7 @@ class CompetencyDAO extends DAO {
         return competency
     }
 
-    static void delete(int id) {
+    void delete(int id) {
         String sql = "DELETE FROM competency WHERE id = ?"
         deleteGeneric(id, sql)
     }

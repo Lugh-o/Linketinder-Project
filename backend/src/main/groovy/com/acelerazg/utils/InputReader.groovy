@@ -10,9 +10,14 @@ import java.time.format.DateTimeParseException
 
 @CompileStatic
 class InputReader {
-    static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private final CompetencyDAO competencyDAO
 
-    static String readNonEmpty(Scanner scanner, String prompt, String errorMessage, int maxLength = 255, int minLength = 0) {
+    InputReader(CompetencyDAO competencyDAO) {
+        this.competencyDAO = competencyDAO
+    }
+    final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    String readNonEmpty(Scanner scanner, String prompt, String errorMessage, int maxLength = 255, int minLength = 0) {
         while (true) {
             println prompt
             String input = scanner.nextLine().trim()
@@ -24,7 +29,7 @@ class InputReader {
         }
     }
 
-    static LocalDate readDate(Scanner scanner, String prompt, String errorMessage) {
+    LocalDate readDate(Scanner scanner, String prompt, String errorMessage) {
         while (true) {
             println prompt
             String input = scanner.nextLine().trim()
@@ -42,9 +47,9 @@ class InputReader {
         }
     }
 
-    static List<Competency> readCompetencies(Scanner appScanner) {
+    List<Competency> readCompetencies(Scanner appScanner) {
         Set<Competency> competencies = new LinkedHashSet<>()
-        List<Competency> allCompetencies = CompetencyDAO.getAll()
+        List<Competency> allCompetencies = competencyDAO.getAll()
         while (true) {
             println "Add competencies: "
             allCompetencies.forEach { comp ->

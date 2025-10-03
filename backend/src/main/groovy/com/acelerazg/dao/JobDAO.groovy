@@ -13,8 +13,15 @@ import java.sql.Statement
 
 @CompileStatic
 class JobDAO extends DAO {
+    private final AddressDAO addressDAO
+    private final CompetencyDAO competencyDAO
 
-    static List<Job> getAllByCompanyId(int id) {
+    JobDAO(AddressDAO addressDAO, CompetencyDAO competencyDAO) {
+        this.addressDAO = addressDAO
+        this.competencyDAO = competencyDAO
+    }
+
+    List<Job> getAllByCompanyId(int id) {
         String sql = """
             SELECT
                 j.id, j.name, j.description, j.id_address,
@@ -52,7 +59,7 @@ class JobDAO extends DAO {
         return jobs
     }
 
-    static Job getById(int id) {
+    Job getById(int id) {
         String sql = """
         SELECT
             j.id, j.name, j.description, j.id_address, j.id_company
@@ -89,7 +96,7 @@ class JobDAO extends DAO {
         return job
     }
 
-    static Job create(Job job, Address address, List<Competency> competencies) {
+    Job create(Job job, Address address, List<Competency> competencies) {
         String sql = """
             INSERT INTO job (name, description, id_company, id_address) VALUES
             (?, ?, ?, ?);
@@ -103,7 +110,7 @@ class JobDAO extends DAO {
             connection = DatabaseHandler.getConnection()
             connection.autoCommit = false
 
-            job.idAddress = AddressDAO.create(connection, address)
+            job.idAddress = addressDAO.create(connection, address)
 
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
             statement.setString(1, job.name)
@@ -132,13 +139,13 @@ class JobDAO extends DAO {
         return job
     }
 
-    static void createJobCompetency(Connection connection, int jobId, Competency competency) {
-        Competency existing = CompetencyDAO.getByName(connection, competency.name)
+    void createJobCompetency(Connection connection, int jobId, Competency competency) {
+        Competency existing = competencyDAO.getByName(connection, competency.name)
         if (!existing) {
-            existing = CompetencyDAO.createWithConnection(connection, competency)
+            existing = competencyDAO.createWithConnection(connection, competency)
         }
 
-        String sql = "INSERT INTO job_competency (id_candidate, id_job) VALUES (?, ?);"
+        String sql = "INSERT INTO job_competency (id_job, id_competency) VALUES (?, ?);"
         PreparedStatement statement = null
         try {
             statement = connection.prepareStatement(sql)
@@ -150,7 +157,7 @@ class JobDAO extends DAO {
         }
     }
 
-    static Job update(int id, Job job, Address address, List<Competency> newCompetencies) {
+    Job update(int id, Job job, Address address, List<Competency> newCompetencies) {
         String sql = """
             UPDATE job SET name = ?, description = ?
             WHERE id = ?
@@ -165,7 +172,7 @@ class JobDAO extends DAO {
 
             Job currentJob = getById(id)
 
-            AddressDAO.update(connection, currentJob.idAddress, address)
+            addressDAO.update(connection, currentJob.idAddress, address)
 
             updateJobCompetencies(connection, id, newCompetencies)
 
@@ -185,7 +192,7 @@ class JobDAO extends DAO {
         return getById(id)
     }
 
-    static void updateJobCompetencies(Connection connection, int jobId, List<Competency> newCompetencies) {
+    void updateJobCompetencies(Connection connection, int jobId, List<Competency> newCompetencies) {
         if (newCompetencies == null) return
         String deleteSql = "DELETE FROM job_competency WHERE id_job = ?"
         PreparedStatement deleteStatement = null
@@ -201,7 +208,7 @@ class JobDAO extends DAO {
         }
     }
 
-    static void delete(int id) {
+    void delete(int id) {
         String sql = "DELETE FROM job WHERE id = ?"
         deleteGeneric(id, sql)
     }

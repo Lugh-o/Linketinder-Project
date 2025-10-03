@@ -11,7 +11,7 @@ import java.sql.Statement
 
 @CompileStatic
 class MatchEventDAO extends DAO {
-    static List<MatchDTO> getAllMatchesByJobId(int idJob) {
+    List<MatchDTO> getAllMatchesByJobId(int idJob) {
         String sql = """
             SELECT 
                 CONCAT(cd.first_name, ' ', cd.last_name) AS candidate_name,
@@ -43,7 +43,7 @@ class MatchEventDAO extends DAO {
         return matches
     }
 
-    static void create(int idJob, int idCandidate) {
+    void create(int idJob, int idCandidate) {
         String sql = """
             INSERT INTO match_event (id_job, id_candidate) VALUES
             (?, ?);

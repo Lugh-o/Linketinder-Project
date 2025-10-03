@@ -11,7 +11,7 @@ import java.sql.Statement
 
 @CompileStatic
 class PersonDAO {
-    static int create(Connection connection, Person person) {
+    int create(Connection connection, Person person) {
         String sql = """
             INSERT INTO person (email, description, passwd, id_address) VALUES
             (?, ?, ?, ?);
@@ -42,7 +42,7 @@ class PersonDAO {
         return idPerson
     }
 
-    static void update(Connection connection, Person person) {
+    void update(Connection connection, Person person) {
         String sql = """
             UPDATE person SET email = ?, description = ?, passwd = ?
             WHERE id = ?

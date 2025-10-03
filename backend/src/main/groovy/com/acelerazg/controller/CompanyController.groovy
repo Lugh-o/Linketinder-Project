@@ -11,11 +11,23 @@ import groovy.transform.CompileStatic
 
 @CompileStatic
 class CompanyController {
-    static List<Company> handleGetAll() {
-        return CompanyDAO.getAll()
+    private final CompanyDAO companyDAO
+    private final CandidateDAO candidateDAO
+    private final MatchEventDAO matchEventDAO
+    private final JobDAO jobDAO
+
+    CompanyController(CompanyDAO companyDAO, CandidateDAO candidateDAO, MatchEventDAO matchEventDAO, JobDAO jobDAO) {
+        this.companyDAO = companyDAO
+        this.candidateDAO = candidateDAO
+        this.matchEventDAO = matchEventDAO
+        this.jobDAO = jobDAO
     }
 
-    static Company createCompany(String description, String passwd, String email, String name, String cnpj, String state, String postalCode, String country, String city, String street) {
+    List<Company> handleGetAll() {
+        return companyDAO.getAll()
+    }
+
+    Company handleCreateCompany(String description, String passwd, String email, String name, String cnpj, String state, String postalCode, String country, String city, String street) {
 
         Company company = new Company(
                 description,
@@ -33,17 +45,19 @@ class CompanyController {
                 street
         )
 
-        return CompanyDAO.create(company, address)
+        return companyDAO.create(company, address)
     }
 
-    static void handleLikeCandidate(int idCompany, int idCandidate) {
-        CompanyDAO.likeCandidate(idCompany, idCandidate)
+    boolean handleLikeCandidate(int idCompany, int idCandidate) {
+        if (companyDAO.isCandidateAlreadyLiked(idCompany, idCandidate)) return false
 
-        List<Job> likedJobs = JobDAO.getAllByCompanyId(idCompany)
+        companyDAO.likeCandidate(idCompany, idCandidate)
+        List<Job> likedJobs = jobDAO.getAllByCompanyId(idCompany)
         likedJobs.each { job ->
-            if (CandidateDAO.hasLikedJob(idCandidate, job.id)) {
-                MatchEventDAO.create(job.id, idCandidate)
+            if (candidateDAO.hasLikedJob(idCandidate, job.id)) {
+                matchEventDAO.create(job.id, idCandidate)
             }
         }
+        return true
     }
 }

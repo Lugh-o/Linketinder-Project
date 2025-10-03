@@ -11,7 +11,8 @@ import java.sql.Statement
 
 @CompileStatic
 class AddressDAO {
-    static int create(Connection connection, Address address) {
+
+    int create(Connection connection, Address address) {
         String sql = """
             INSERT INTO address (state, postal_code, country, city, street) VALUES
             (?, ?, ?, ?, ?);
@@ -42,7 +43,7 @@ class AddressDAO {
         return idAddress
     }
 
-    static void update(Connection connection, int id, Address address) {
+    void update(Connection connection, int id, Address address) {
         String sql = """
             UPDATE address SET state = ?, postal_code = ?, country = ?, city = ?, street = ?
             WHERE id = ?

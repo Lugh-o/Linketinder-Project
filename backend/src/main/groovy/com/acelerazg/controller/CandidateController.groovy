@@ -11,17 +11,23 @@ import java.time.LocalDate
 
 @CompileStatic
 class CandidateController {
-    static List<Candidate> handleGetAll() {
-        return CandidateDAO.getAll()
+    private final CandidateDAO candidateDao
+
+    CandidateController(CandidateDAO candidateDao) {
+        this.candidateDao = candidateDao
     }
 
-    static List<AnonymousCandidateDTO> handleGetAllInterestedInJob(int idJob) {
-        return CandidateDAO.getAllCandidatesInterestedByJobId(idJob)
+    List<Candidate> handleGetAll() {
+        return candidateDao.getAll()
     }
 
-    static Candidate handleCreateCandidate(String description, String passwd, String email, String firstName, String lastName, String cpf, LocalDate birthday, String graduation, String state, String postalCode, String country, String city, String street, List<Competency> competencies) {
+    List<AnonymousCandidateDTO> handleGetAllInterestedInJob(int idJob) {
+        return candidateDao.getAllCandidatesInterestedByJobId(idJob)
+    }
 
-        if (CandidateDAO.getByEmail(email)) return null
+    Candidate handleCreateCandidate(String description, String passwd, String email, String firstName, String lastName, String cpf, LocalDate birthday, String graduation, String state, String postalCode, String country, String city, String street, List<Competency> competencies) {
+
+        if (candidateDao.getByEmail(email)) return null
 
         Candidate candidate = new Candidate(
                 description,
@@ -42,12 +48,14 @@ class CandidateController {
                 street
         )
 
-        candidate = CandidateDAO.create(candidate, address, competencies)
+        candidate = candidateDao.create(candidate, address, competencies)
 
         return candidate
     }
 
-    static void handleLikeJob(int idCandidate, int idJob) {
-        CandidateDAO.likeJob(idCandidate, idJob)
+    boolean handleLikeJob(int idCandidate, int idJob) {
+        if (candidateDao.isJobAlreadyLiked(idCandidate, idJob)) return false
+        candidateDao.likeJob(idCandidate, idJob)
+        return true
     }
 }

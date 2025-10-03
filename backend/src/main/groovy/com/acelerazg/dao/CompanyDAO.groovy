@@ -12,7 +12,15 @@ import java.sql.Statement
 
 @CompileStatic
 class CompanyDAO extends DAO {
-    static List<Company> getAll() {
+    private final AddressDAO addressDAO
+    private final PersonDAO personDAO
+
+    CompanyDAO(AddressDAO addressDAO, PersonDAO personDAO) {
+        this.addressDAO = addressDAO
+        this.personDAO = personDAO
+    }
+
+    List<Company> getAll() {
         String sql = """
         SELECT 
             c.id as id_company, c.name, c.cnpj,
@@ -47,7 +55,7 @@ class CompanyDAO extends DAO {
         return companies
     }
 
-    static Company getById(int id) {
+    Company getById(int id) {
         String sql = """
             SELECT 
                 c.id as id_company, c.name, c.cnpj, c.id_person, 
@@ -87,9 +95,9 @@ class CompanyDAO extends DAO {
         return company
     }
 
-    static Company create(Company company, Address address) {
+    Company create(Company company, Address address) {
         String sql = """
-            INSERT INTO comapany (name, cnpj, id_person) VALUES
+            INSERT INTO company (name, cnpj, id_person) VALUES
             (?, ?, ?)
         """
 
@@ -101,8 +109,8 @@ class CompanyDAO extends DAO {
             connection = DatabaseHandler.getConnection()
             connection.autoCommit = false
 
-            company.idAddress = AddressDAO.create(connection, address)
-            company.idPerson = PersonDAO.create(connection, company)
+            company.idAddress = addressDAO.create(connection, address)
+            company.idPerson = personDAO.create(connection, company)
 
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
             statement.setString(1, company.name)
@@ -126,7 +134,7 @@ class CompanyDAO extends DAO {
 
     }
 
-    static Company update(int id, Company company, Address address) {
+    Company update(int id, Company company, Address address) {
         String sql = """
             UPDATE company SET name = ?, cnpj = ?
             WHERE id = ?
@@ -141,8 +149,8 @@ class CompanyDAO extends DAO {
 
             Company currentCompany = getById(id)
 
-            AddressDAO.update(connection, currentCompany.idAddress, address)
-            PersonDAO.update(connection, company)
+            addressDAO.update(connection, currentCompany.idAddress, address)
+            personDAO.update(connection, company)
 
             statement = connection.prepareStatement(sql)
             statement.setString(1, company.name)
@@ -162,15 +170,41 @@ class CompanyDAO extends DAO {
 
     }
 
-    static void delete(int id) {
+    void delete(int id) {
         String sql = "DELETE FROM company WHERE id = ?"
         deleteGeneric(id, sql)
     }
 
-    static void likeCandidate(int idCompany, int idCandidate) {
+    void likeCandidate(int idCompany, int idCandidate) {
         String sql = """
             INSERT INTO company_like (id_company, id_candidate) VALUES (?, ?)
         """
         likeGeneric(idCompany, idCandidate, sql)
+    }
+
+    boolean isCandidateAlreadyLiked(int idCompany, int idCandidate) {
+        String sql = """
+            SELECT * FROM company_like
+            WHERE id_company = ? AND id_candidate = ?;        
+        """
+
+        Connection connection = null
+        PreparedStatement statement = null
+        ResultSet response = null
+
+        try {
+            connection = DatabaseHandler.getConnection()
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+            statement.setInt(1, idCompany)
+            statement.setInt(2, idCandidate)
+
+            response = statement.executeQuery()
+            if (response.next()) {
+                return true
+            }
+        } finally {
+            DatabaseHandler.closeQuietly(response, statement, connection)
+        }
+        return false
     }
 }

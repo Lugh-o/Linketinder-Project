@@ -9,7 +9,7 @@ import java.sql.Statement
 
 @CompileStatic
 class DAO {
-    static void deleteGeneric(int id, String sql) {
+    void deleteGeneric(int id, String sql) {
         Connection connection = null
         PreparedStatement statement = null
 
@@ -30,7 +30,7 @@ class DAO {
         }
     }
 
-    static void likeGeneric(int originId, int targetId, String sql) {
+    void likeGeneric(int originId, int targetId, String sql) {
         Connection connection = null
         PreparedStatement statement = null
 
