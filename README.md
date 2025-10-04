@@ -8,13 +8,24 @@ Uma aplicação que mescla as funcionalidades do Linkedin e do Tinder, para Cand
 -   Empresas podem ter vagas
 -   Likes e matches de vagas entre empresas e candidatos
 
+## Tecnologias utilizadas
+
+- Groovy 4.0.6
+- Spock 2.4
+- JDBC
+- PostgreSQL
+- Gradle 6.9.4
+- Typescript
+- Vite
+- HTML/CSS
+
 ## Backend
 
 ### Requisitos
 
--   Java 8+
--   Groovy 4.0.14+
--   PostgreSQL
+-   JVM 8+
+-   Groovy 4.0.6+
+-   PostgreSQL 
 
 ### Como executar
 
@@ -25,11 +36,22 @@ cd Linketinder-Project/backend
 ```
 
 Crie um arquivo .env baseado no .env.example e insira as credenciais do seu banco de dados
+
 ```
 cp .env.example .env
 ```
 
-É necessário realizar a migração inicial do banco de dados, que atualmente se encontra em 'backend/src/main/groovy/com/acelerazg/persistence/Migrate.groovy'. Posteriormente será elaborado um script utilizando gradle para esse passo.
+Para executar a migração inicial do banco de dados:
+
+```
+./gradlew migrate
+```
+
+Para inserir dados dummy no banco de dados:
+
+```
+./gradlew seed
+```
 
 Para compilar o projeto:
 
@@ -40,7 +62,7 @@ Para compilar o projeto:
 Para rodar:
 
 ```
-java -jar build/libs/Linketinder-Project-1.0-SNAPSHOT.jar
+./gradlew run
 ```
 
 Para executar os testes unitários:
@@ -53,7 +75,7 @@ Para executar os testes unitários:
 
 ### Requisitos
 
--   Node.Js 20.19+
+-   Node.js 20.19+
 
 ### Como executar
 

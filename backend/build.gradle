@@ -1,6 +1,5 @@
 plugins {
     id 'groovy'
-    id 'application'
 }
 
 group = 'com.acelerazg'
@@ -11,30 +10,31 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.groovy:groovy:4.0.14'
+    implementation 'org.apache.groovy:groovy:4.0.6'
     implementation 'org.postgresql:postgresql:42.7.8'
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation "net.bytebuddy:byte-buddy:1.17.7"
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     testImplementation 'org.spockframework:spock-core:2.4-M1-groovy-4.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation "net.bytebuddy:byte-buddy:1.17.7"
 }
 
 test {
     useJUnitPlatform()
 }
 
-application {
-    mainClass = 'com.acelerazg.Main'
+tasks.register('migrate', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.acelerazg.persistence.Migrate'
 }
 
-jar {
-    manifest {
-        attributes(
-            'Main-Class': application.mainClass
-        )
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+tasks.register('seed', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.acelerazg.persistence.Seed'
+}
+
+tasks.register('run', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.acelerazg.Main'
+    standardInput = System.in
 }
