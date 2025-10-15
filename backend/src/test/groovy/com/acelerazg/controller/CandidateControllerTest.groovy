@@ -5,6 +5,8 @@ import com.acelerazg.dao.CandidateDAO
 import com.acelerazg.dao.CompetencyDAO
 import com.acelerazg.dao.PersonDAO
 import com.acelerazg.dto.AnonymousCandidateDTO
+import com.acelerazg.dto.CreateCandidateDTO
+import com.acelerazg.model.Address
 import com.acelerazg.model.Candidate
 import com.acelerazg.model.Competency
 import spock.lang.Specification
@@ -44,12 +46,10 @@ class CandidateControllerTest extends Specification {
 
     def "HandleGetAllInterestedInJob"() {
         given:
-        AnonymousCandidateDTO fakeDTO = new AnonymousCandidateDTO(
-                1,
+        AnonymousCandidateDTO fakeDTO = new AnonymousCandidateDTO(1,
                 "CS",
                 "Description",
-                [new Competency("Java"), new Competency("Python")]
-        )
+                [new Competency("Java"), new Competency("Python")])
 
         candidateDAO.getAllCandidatesInterestedByJobId(42) >> [fakeDTO]
 
@@ -68,15 +68,16 @@ class CandidateControllerTest extends Specification {
         List<Competency> competencies = [new Competency("Java"), new Competency("Python")]
 
         Candidate createdCandidate = new Candidate(1, email, "desc", 1, 1, "First", "Last", "123", LocalDate.now(), "CS")
+        Address createdCandidateAddress = new Address("State", "12345", "Country", "City", "Street")
+        CreateCandidateDTO createCandidateDTO = new CreateCandidateDTO("desc", "pass", email, "First", "Last", "123",
+                LocalDate.now(), "CS", createdCandidateAddress, competencies)
+
 
         candidateDAO.getByEmail(email) >> null
         candidateDAO.create(*_) >> createdCandidate
 
         when:
-        Candidate result = controller.handleCreateCandidate(
-                "desc", "pass", email, "First", "Last", "123",
-                LocalDate.now(), "CS", "State", "12345", "Country", "City", "Street", competencies
-        )
+        Candidate result = controller.handleCreateCandidate(createCandidateDTO)
 
         then:
         result != null

@@ -8,16 +8,12 @@ import java.sql.PreparedStatement
 import java.sql.Statement
 
 @CompileStatic
-class DAO {
+abstract class DAO {
     void deleteGeneric(int id, String sql) {
-        Connection connection = null
-        PreparedStatement statement = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
-
-            statement = connection.prepareStatement(sql)
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id)
             statement.executeUpdate()
 
@@ -26,19 +22,15 @@ class DAO {
             if (connection != null) connection.rollback()
             throw e
         } finally {
-            DatabaseHandler.closeQuietly(statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
     }
 
     void likeGeneric(int originId, int targetId, String sql) {
-        Connection connection = null
-        PreparedStatement statement = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
-
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, originId)
             statement.setInt(2, targetId)
             statement.executeUpdate()
@@ -48,7 +40,7 @@ class DAO {
             if (connection != null) connection.rollback()
             throw e
         } finally {
-            DatabaseHandler.closeQuietly(statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
     }
 }

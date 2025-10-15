@@ -1,6 +1,7 @@
 package com.acelerazg.dao
 
 import com.acelerazg.dto.AnonymousCandidateDTO
+import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Address
 import com.acelerazg.model.Candidate
 import com.acelerazg.model.Competency
@@ -22,7 +23,6 @@ class CandidateDAO extends DAO {
         this.competencyDAO = competencyDAO
     }
 
-    @SuppressWarnings()
     List<Candidate> getAll() {
         String sql = """            
             SELECT 
@@ -32,64 +32,51 @@ class CandidateDAO extends DAO {
             INNER JOIN person p ON c.id_person = p.id
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
         List<Candidate> candidates = []
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql)
-            response = statement.executeQuery()
-            while (response.next()) {
-                candidates.add(new Candidate(
-                        response.getInt("id_person"),
-                        response.getString("email"),
-                        response.getString("description"),
-                        response.getInt("id_address"),
-                        response.getInt("id_candidate"),
-                        response.getString("first_name"),
-                        response.getString("last_name"),
-                        response.getString("cpf"),
-                        LocalDate.parse(response.getString("birthday")),
-                        response.getString("graduation"),
-                ))
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql)
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                candidates.add(new Candidate(resultSet.getInt("id_person"),
+                        resultSet.getString("email"),
+                        resultSet.getString("description"),
+                        resultSet.getInt("id_address"),
+                        resultSet.getInt("id_candidate"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getString("cpf"),
+                        LocalDate.parse(resultSet.getString("birthday")),
+                        resultSet.getString("graduation")))
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+        } catch (SQLException e) {
+            throw new DataAccessException("Error fetching candidates", e)
         }
         return candidates
     }
 
-    private Candidate getCandidateGeneric(String sql, def parameter) {
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
-        Candidate candidate = null
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-            statement.setObject(1, parameter)
-            response = statement.executeQuery()
-            if (response.next()) {
-                candidate = new Candidate(
-                        response.getInt("id_person"),
-                        response.getString("email"),
-                        response.getString("description"),
-                        response.getString("passwd"),
-                        response.getInt("id_address"),
-                        response.getInt("id_candidate"),
-                        response.getString("first_name"),
-                        response.getString("last_name"),
-                        response.getString("cpf"),
-                        LocalDate.parse(response.getString("birthday")),
-                        response.getString("graduation"),
-                )
+    private Candidate getCandidateGeneric(String sql, Object param) {
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setObject(1, param)
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) return null
+                return new Candidate(resultSet.getInt("id_person"),
+                        resultSet.getString("email"),
+                        resultSet.getString("description"),
+                        resultSet.getString("passwd"),
+                        resultSet.getInt("id_address"),
+                        resultSet.getInt("id_candidate"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getString("cpf"),
+                        resultSet.getDate("birthday").toLocalDate(),
+                        resultSet.getString("graduation"))
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+        } catch (SQLException e) {
+            throw new DataAccessException("Error fetching candidate", e)
         }
-        return candidate
     }
 
     Candidate getById(int id) {
@@ -137,29 +124,27 @@ class CandidateDAO extends DAO {
             WHERE j.id = ?
             GROUP BY cd.id, cd.graduation, p.description;
         """
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
+
         List<AnonymousCandidateDTO> candidates = []
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             statement.setObject(1, id)
-            response = statement.executeQuery()
-            while (response.next()) {
-                candidates.add(new AnonymousCandidateDTO(
-                        response.getInt("candidate_id"),
-                        response.getString("candidate_graduation"),
-                        response.getString("candidate_description"),
-                        response.getString("candidate_competencies")
-                                .split(',')
-                                .collect { it.trim() }
-                                .collect { new Competency(it) }
-                ))
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    candidates.add(new AnonymousCandidateDTO(resultSet.getInt("candidate_id"),
+                            resultSet.getString("candidate_graduation"),
+                            resultSet.getString("candidate_description"),
+                            resultSet.getString("candidate_competencies")
+                                    .split(',')
+                                    .collect { it.trim() }
+                                    .collect { new Competency(it) }))
+                }
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error fetching candidates", e)
         }
         return candidates
     }
@@ -169,21 +154,18 @@ class CandidateDAO extends DAO {
             SELECT * from candidate_like
             WHERE id_candidate = ? AND id_job = ?
         """
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             statement.setInt(1, idCandidate)
             statement.setInt(2, idJob)
-            response = statement.executeQuery()
-            if (response.next()) {
-                return true
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) return true
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error fetching likes", e)
         }
         return false
     }
@@ -194,18 +176,13 @@ class CandidateDAO extends DAO {
             (?, ?, ?, ?, ?, ?);
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
-
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             candidate.idAddress = addressDAO.create(connection, address)
             candidate.idPerson = personDAO.create(connection, candidate)
 
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
             statement.setString(1, candidate.firstName)
             statement.setString(2, candidate.lastName)
             statement.setInt(3, candidate.idPerson)
@@ -213,40 +190,33 @@ class CandidateDAO extends DAO {
             statement.setDate(5, Date.valueOf(candidate.birthday))
             statement.setString(6, candidate.graduation)
             statement.executeUpdate()
-            response = statement.getGeneratedKeys()
-
-            if (response.next()) {
-                candidate.idCandidate = response.getInt("id")
+            try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                if (resultSet.next()) candidate.idCandidate = resultSet.getInt("id")
             }
-
             competencies.forEach { createCandidateCompetency(connection, candidate.idCandidate, it) }
 
             connection.commit()
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (connection != null) connection.rollback()
-            throw e
+            throw new DataAccessException("Error creating candidate", e)
         } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
-
         return candidate
     }
 
     void createCandidateCompetency(Connection connection, int idCandidate, Competency competency) {
         Competency existing = competencyDAO.getByName(connection, competency.name)
-        if (!existing) {
-            existing = competencyDAO.createWithConnection(connection, competency)
-        }
+        if (!existing) existing = competencyDAO.createWithConnection(connection, competency)
 
         String sql = "INSERT INTO candidate_competency (id_candidate, id_competency) VALUES (?, ?);"
-        PreparedStatement statement = null
-        try {
-            statement = connection.prepareStatement(sql)
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idCandidate)
             statement.setInt(2, existing.id)
             statement.executeUpdate()
-        } finally {
-            DatabaseHandler.closeQuietly(statement)
+        } catch (SQLException e) {
+            if (connection != null) connection.rollback()
+            throw new DataAccessException("Error creating candidate competency", e)
         }
     }
 
@@ -256,20 +226,16 @@ class CandidateDAO extends DAO {
             WHERE id = ?
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
-
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             Candidate currentCandidate = getById(id)
 
             addressDAO.update(connection, currentCandidate.idAddress, address)
             personDAO.update(connection, candidate)
             updateCandidateCompetencies(connection, id, newCompetencies)
 
-            statement = connection.prepareStatement(sql)
             statement.setString(1, candidate.firstName)
             statement.setString(2, candidate.lastName)
             statement.setString(3, candidate.cpf)
@@ -279,29 +245,25 @@ class CandidateDAO extends DAO {
             statement.executeUpdate()
 
             connection.commit()
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (connection != null) connection.rollback()
-            throw e
+            throw new DataAccessException("Error updating candidate", e)
         } finally {
-            DatabaseHandler.closeQuietly(statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
-
         return getById(id)
     }
 
     void updateCandidateCompetencies(Connection connection, int idCandidate, List<Competency> newCompetencies) {
         if (newCompetencies == null) return
         String deleteSql = "DELETE FROM candidate_competency WHERE id_candidate = ?"
-        PreparedStatement deleteStatement = null
-        try {
-            deleteStatement = connection.prepareStatement(deleteSql)
+        try (PreparedStatement deleteStatement = connection.prepareStatement(deleteSql)) {
             deleteStatement.setInt(1, idCandidate)
             deleteStatement.executeUpdate()
-        } finally {
-            DatabaseHandler.closeQuietly(deleteStatement)
+        } catch (SQLException e) {
+            throw new DataAccessException("Error updating candidate competencies", e)
         }
-        newCompetencies.forEach { c ->
-            createCandidateCompetency(connection, idCandidate, c)
+        newCompetencies.forEach { c -> createCandidateCompetency(connection, idCandidate, c)
         }
     }
 
@@ -323,22 +285,17 @@ class CandidateDAO extends DAO {
             WHERE id_candidate = ? AND id_job = ?;
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
-
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, idCandidate)
             statement.setInt(2, idJob)
 
-            response = statement.executeQuery()
-            if (response.next()) {
-                return true
+            try (ResultSet response = statement.executeQuery()) {
+                if (response.next()) return true
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error fetching like", e)
         }
         return false
     }

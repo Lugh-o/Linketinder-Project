@@ -16,7 +16,6 @@ class Candidate extends Person {
     String graduation
     int idPerson
 
-    // COMPLETO
     Candidate(int idPerson, String email, String description, String passwd, int idAddress, int idCandidate, String firstName, String lastName, String cpf, LocalDate birthday, String graduation) {
         super(idPerson, email, description, passwd, idAddress)
         this.idCandidate = idCandidate

@@ -1,44 +1,34 @@
 package com.acelerazg.dao
 
+import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Address
-import com.acelerazg.persistence.DatabaseHandler
 import groovy.transform.CompileStatic
 
-import java.sql.Connection
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.Statement
+import java.sql.*
 
 @CompileStatic
 class AddressDAO {
-
     int create(Connection connection, Address address) {
         String sql = """
             INSERT INTO address (state, postal_code, country, city, street) VALUES
             (?, ?, ?, ?, ?);
         """
-        PreparedStatement statement = null
-        ResultSet response = null
         int idAddress = 0
 
-        try {
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, address.state)
             statement.setString(2, address.postalCode)
             statement.setString(3, address.country)
             statement.setString(4, address.city)
             statement.setString(5, address.street)
             statement.executeUpdate()
-            response = statement.getGeneratedKeys()
-            if (response.next()) {
-                idAddress = response.getInt(1)
+            try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                if (resultSet.next()) idAddress = resultSet.getInt(1)
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (connection != null) connection.rollback()
-            throw e
-        } finally {
-            DatabaseHandler.closeQuietly(statement, response)
+            throw new DataAccessException("Error creating address", e)
         }
         return idAddress
     }
@@ -49,10 +39,7 @@ class AddressDAO {
             WHERE id = ?
         """
 
-        PreparedStatement statement = null
-
-        try {
-            statement = connection.prepareStatement(sql)
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, address.state)
             statement.setString(2, address.postalCode)
             statement.setString(3, address.country)
@@ -60,11 +47,9 @@ class AddressDAO {
             statement.setString(5, address.street)
             statement.setInt(6, id)
             statement.executeUpdate()
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (connection != null) connection.rollback()
-            throw e
-        } finally {
-            DatabaseHandler.closeQuietly(statement)
+            throw new DataAccessException("Error updating address", e)
         }
     }
 }

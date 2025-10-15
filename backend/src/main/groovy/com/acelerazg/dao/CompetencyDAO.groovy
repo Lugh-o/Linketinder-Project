@@ -13,24 +13,15 @@ import java.sql.Statement
 class CompetencyDAO extends DAO {
     List<Competency> getAll() {
         String sql = "SELECT * FROM competency"
-
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
         List<Competency> competencies = []
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql)
-            response = statement.executeQuery()
-            while (response.next()) {
-                competencies.add(new Competency(
-                        response.getString("name"),
-                        response.getInt("id")
-                ))
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql)
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                competencies.add(new Competency(resultSet.getString("name"),
+                        resultSet.getInt("id")))
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
         }
         return competencies
     }
@@ -40,74 +31,60 @@ class CompetencyDAO extends DAO {
             SELECT * from competency c
             WHERE c.name = ?;
         """
-
-        PreparedStatement statement = null
-        ResultSet response = null
         Competency competency = null
 
-        try {
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, name)
-            response = statement.executeQuery()
-            if (response.next()) {
-                competency = new Competency(
-                        response.getString("name"),
-                        response.getInt("id")
-                )
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    competency = new Competency(resultSet.getString("name"),
+                            resultSet.getInt("id"))
+                }
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement)
         }
         return competency
     }
 
     Competency create(Competency competency) {
         String sql = "INSERT INTO competency (name) VALUES (?)"
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
-
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, competency.name)
             statement.executeUpdate()
-            response = statement.getGeneratedKeys()
-
-            if (response.next()) {
-                competency.id = response.getInt(1)
+            try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                if (resultSet.next()) {
+                    competency.id = resultSet.getInt(1)
+                }
             }
+
             connection.commit()
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e
         } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
         return competency
     }
 
     Competency createWithConnection(Connection connection, Competency competency) {
         String sql = "INSERT INTO competency (name) VALUES (?)"
-        PreparedStatement statement = null
-        ResultSet response = null
 
-        try {
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, competency.name)
             statement.executeUpdate()
-            response = statement.getGeneratedKeys()
 
-            if (response.next()) {
-                competency.id = response.getInt(1)
+            try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                if (resultSet.next()) {
+                    competency.id = resultSet.getInt(1)
+                }
             }
+
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement)
         }
         return competency
     }

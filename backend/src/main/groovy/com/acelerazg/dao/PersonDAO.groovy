@@ -1,7 +1,6 @@
 package com.acelerazg.dao
 
 import com.acelerazg.model.Person
-import com.acelerazg.persistence.DatabaseHandler
 import groovy.transform.CompileStatic
 
 import java.sql.Connection
@@ -16,28 +15,22 @@ class PersonDAO {
             INSERT INTO person (email, description, passwd, id_address) VALUES
             (?, ?, ?, ?);
         """
-
-        PreparedStatement statement = null
-        ResultSet response = null
         int idPerson = 0
 
-        try {
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, person.email)
             statement.setString(2, person.description)
             statement.setString(3, person.passwd)
             statement.setInt(4, person.idAddress)
             statement.executeUpdate()
-            response = statement.getGeneratedKeys()
-
-            if (response.next()) {
-                idPerson = response.getInt(1)
+            try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                if (resultSet.next()) {
+                    idPerson = resultSet.getInt(1)
+                }
             }
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e
-        } finally {
-            DatabaseHandler.closeQuietly(statement, response)
         }
         return idPerson
     }
@@ -48,10 +41,7 @@ class PersonDAO {
             WHERE id = ?
         """
 
-        PreparedStatement statement = null
-
-        try {
-            statement = connection.prepareStatement(sql)
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, person.email)
             statement.setString(2, person.description)
             statement.setString(3, person.passwd)
@@ -62,8 +52,6 @@ class PersonDAO {
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e
-        } finally {
-            DatabaseHandler.closeQuietly(statement)
         }
     }
 }

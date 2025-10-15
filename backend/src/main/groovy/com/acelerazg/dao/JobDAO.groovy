@@ -33,28 +33,21 @@ class JobDAO extends DAO {
             INNER JOIN address a ON p.id_address = a.id
             WHERE id_company = ?
         """
-
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
         List<Job> jobs = []
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, id)
-            response = statement.executeQuery()
-            while (response.next()) {
-                jobs.add(new Job(
-                        response.getInt("id"),
-                        response.getString("name"),
-                        response.getString("description"),
-                        response.getInt("id_address"),
-                        response.getInt("id_company")
-                ))
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    jobs.add(new Job(resultSet.getInt("id"),
+                            resultSet.getString("name"),
+                            resultSet.getString("description"),
+                            resultSet.getInt("id_address"),
+                            resultSet.getInt("id_company")))
+                }
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
         }
         return jobs
     }
@@ -70,28 +63,21 @@ class JobDAO extends DAO {
         INNER JOIN company c ON j.id_company = c.id
         WHERE j.id = ?
         """
-
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
         Job job = null
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             statement.setInt(1, id)
-            response = statement.executeQuery()
-            if (response.next()) {
-                job = new Job(
-                        response.getInt("id"),
-                        response.getString("name"),
-                        response.getString("description"),
-                        response.getInt("id_address"),
-                        response.getInt("id_company")
-                )
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    job = new Job(resultSet.getInt("id"),
+                            resultSet.getString("name"),
+                            resultSet.getString("description"),
+                            resultSet.getInt("id_address"),
+                            resultSet.getInt("id_company"))
+                }
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
         }
         return job
     }
@@ -102,39 +88,30 @@ class JobDAO extends DAO {
             (?, ?, ?, ?);
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             job.idAddress = addressDAO.create(connection, address)
 
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
             statement.setString(1, job.name)
             statement.setString(2, job.description)
             statement.setInt(3, job.idCompany)
             statement.setInt(4, job.idAddress)
             statement.executeUpdate()
-            response = statement.getGeneratedKeys()
-            if (response.next()) {
-                job.id = response.getInt("id")
+            try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                if (resultSet.next()) job.id = resultSet.getInt("id")
             }
 
-            competencies.forEach { it ->
-                {
-                    createJobCompetency(connection, job.id, it)
-                }
-            }
+            competencies.forEach { createJobCompetency(connection, job.id, it) }
 
             connection.commit()
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e
         } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
         return job
     }
@@ -146,14 +123,10 @@ class JobDAO extends DAO {
         }
 
         String sql = "INSERT INTO job_competency (id_job, id_competency) VALUES (?, ?);"
-        PreparedStatement statement = null
-        try {
-            statement = connection.prepareStatement(sql)
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, jobId)
             statement.setInt(2, existing.id)
             statement.executeUpdate()
-        } finally {
-            DatabaseHandler.closeQuietly(statement)
         }
     }
 
@@ -163,20 +136,14 @@ class JobDAO extends DAO {
             WHERE id = ?
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
-
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             Job currentJob = getById(id)
-
             addressDAO.update(connection, currentJob.idAddress, address)
-
             updateJobCompetencies(connection, id, newCompetencies)
 
-            statement = connection.prepareStatement(sql)
             statement.setString(1, job.name)
             statement.setString(2, job.description)
             statement.setInt(3, id)
@@ -187,7 +154,7 @@ class JobDAO extends DAO {
             if (connection != null) connection.rollback()
             throw e
         } finally {
-            DatabaseHandler.closeQuietly(statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
         return getById(id)
     }
@@ -195,16 +162,12 @@ class JobDAO extends DAO {
     void updateJobCompetencies(Connection connection, int jobId, List<Competency> newCompetencies) {
         if (newCompetencies == null) return
         String deleteSql = "DELETE FROM job_competency WHERE id_job = ?"
-        PreparedStatement deleteStatement = null
-        try {
-            deleteStatement = connection.prepareStatement(deleteSql)
+
+        try (PreparedStatement deleteStatement = connection.prepareStatement(deleteSql)) {
             deleteStatement.setInt(1, jobId)
             deleteStatement.executeUpdate()
-        } finally {
-            DatabaseHandler.closeQuietly(deleteStatement)
         }
-        newCompetencies.forEach { c ->
-            createJobCompetency(connection, jobId, c)
+        newCompetencies.forEach { c -> createJobCompetency(connection, jobId, c)
         }
     }
 

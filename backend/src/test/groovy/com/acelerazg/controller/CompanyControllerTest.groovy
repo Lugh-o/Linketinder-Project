@@ -1,6 +1,8 @@
 package com.acelerazg.controller
 
 import com.acelerazg.dao.*
+import com.acelerazg.dto.CreateCompanyDTO
+import com.acelerazg.model.Address
 import com.acelerazg.model.Company
 import spock.lang.Specification
 
@@ -43,9 +45,11 @@ class CompanyControllerTest extends Specification {
         given:
         Company createdCompany = new Company('description', 'password', 'email', 'name', 'cnpj')
         companyDAO.create(*_) >> createdCompany
+        Address createdCompanyAddress = new Address('state', 'postalCode', 'country', 'city', 'street')
+        CreateCompanyDTO createCompanyDTO = new CreateCompanyDTO('description', 'password', 'email', 'name', 'cnpj', createdCompanyAddress)
 
         when:
-        Company result = controller.handleCreateCompany('description', 'password', 'email', 'name', 'cnpj', 'state', 'postalCode', 'country', 'city', 'street')
+        Company result = controller.handleCreateCompany(createCompanyDTO)
 
         then:
         result != null

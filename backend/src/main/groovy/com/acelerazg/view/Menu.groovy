@@ -5,12 +5,11 @@ import com.acelerazg.controller.CompanyController
 import com.acelerazg.controller.JobController
 import com.acelerazg.controller.MatchController
 import com.acelerazg.dao.*
-import com.acelerazg.dto.AnonymousCandidateDTO
+import com.acelerazg.dto.CreateCandidateDTO
+import com.acelerazg.dto.CreateCompanyDTO
+import com.acelerazg.dto.CreateJobDTO
 import com.acelerazg.dto.MatchDTO
-import com.acelerazg.model.Candidate
-import com.acelerazg.model.Company
-import com.acelerazg.model.Competency
-import com.acelerazg.model.Job
+import com.acelerazg.model.*
 import com.acelerazg.utils.InputReader
 import groovy.transform.CompileStatic
 
@@ -23,6 +22,7 @@ class Menu {
     private final JobController jobController
     private final MatchController matchController
     private final InputReader inputReader
+    private final Scanner appScanner
 
     Menu() {
         AddressDAO addressDao = new AddressDAO()
@@ -37,255 +37,170 @@ class Menu {
         companyController = new CompanyController(companyDao, candidateDao, matchEventDAO, jobDAO)
         jobController = new JobController(jobDAO)
         matchController = new MatchController(matchEventDAO)
-        inputReader = new InputReader(competencyDao)
+        appScanner = new Scanner(System.in)
+        inputReader = new InputReader(competencyDao, appScanner)
     }
 
-    static void openMenu() {
+    static void run() {
         Menu menu = new Menu()
-        menu.showOptions()
+        menu.showMenu()
     }
 
-    void showOptions() {
+    void showMenu() {
         println "Welcome to Linketinder!"
 
         String appInput = ""
-        try (Scanner appScanner = new Scanner(System.in)) {
-            while (appInput != "q") {
-                println "Insert the desired operation:\n" +
-                        "1 - List all candidates\n" +
-                        "2 - List all companies\n" +
-                        "3 - Create a candidate\n" +
-                        "4 - Create a company\n" +
-                        "5 - Add a Job to a company\n" +
-                        "6 - Like a job as an candidate\n" +
-                        "7 - Like a candidate as a company\n" +
-                        "8 - List all matches of a job\n" +
-                        "q - Exit the application\n"
-                appInput = appScanner.nextLine()
-                switch (appInput) {
-                    case "1":
-                        candidateController.handleGetAll().forEach { println it }
-                        break
-                    case "2":
-                        companyController.handleGetAll().forEach { println it }
-                        break
-                    case "3":
-                        String candidateDescription = inputReader.readNonEmpty(appScanner,
-                                "Candidate Description: ", "The candidate description cannot be empty.")
-                        String candidatePassword = inputReader.readNonEmpty(appScanner,
-                                "Candidate Password: ", "The candidate password cannot be empty.")
-                        String candidateEmail = inputReader.readNonEmpty(appScanner,
-                                "Candidate Email: ", "The candidate email cannot be empty.")
-                        String candidateFirstName = inputReader.readNonEmpty(appScanner,
-                                "Candidate First Name: ", "The candidate first name cannot be empty.")
-                        String candidateLastName = inputReader.readNonEmpty(appScanner,
-                                "Candidate Last Name: ", "The candidate last name cannot be empty.")
-                        String candidateCpf = inputReader.readNonEmpty(appScanner,
-                                "Candidate CPF: ", "The candidate CPF cannot be empty.", 11)
-                        LocalDate candidateBirthday = inputReader.readDate(appScanner,
-                                "Candidate birthday: (yyyy-MM-dd) ", "Invalid date. Try again.")
-                        String candidateGraduation = inputReader.readNonEmpty(appScanner,
-                                "Candidate Graduation: ", "The candidate graduation cannot be empty")
+        while (appInput != "q") {
+            println "Insert the desired operation:"
+            println "1 - List all candidates"
+            println "2 - List all companies"
+            println "3 - Create a candidate"
+            println "4 - Create a company"
+            println "5 - Add a Job to a company"
+            println "6 - Like a job as an candidate"
+            println "7 - Like a candidate as a company"
+            println "8 - List all matches of a job"
+            println "q - Exit the application"
+            appInput = appScanner.nextLine()
 
-                        String candidateState = inputReader.readNonEmpty(appScanner,
-                                "Candidate State:", "Invalid Input. Try again.", 2, 2)
-                        String candidatePostalCode = inputReader.readNonEmpty(appScanner,
-                                "Candidate Postal Code:", "The candidate postal code cannot be empty", 16)
-                        String candidateCountry = inputReader.readNonEmpty(appScanner,
-                                "Candidate Country:", "The candidate country cannot be empty")
-                        String candidateCity = inputReader.readNonEmpty(appScanner,
-                                "Candidate City:", "The candidate city cannot be empty")
-                        String candidateStreet = inputReader.readNonEmpty(appScanner,
-                                "Candidate Street:", "The candidate street cannot be empty")
-
-                        List<Competency> candidateCompetencies = inputReader.readCompetencies(appScanner)
-
-                        Candidate candidate = candidateController.handleCreateCandidate(
-                                candidateDescription,
-                                candidatePassword,
-                                candidateEmail,
-                                candidateFirstName,
-                                candidateLastName,
-                                candidateCpf,
-                                candidateBirthday,
-                                candidateGraduation,
-                                candidateState,
-                                candidatePostalCode,
-                                candidateCountry,
-                                candidateCity,
-                                candidateStreet,
-                                candidateCompetencies
-                        )
-                        if (candidate) {
-                            println "Candidate added successfully!"
-                        } else {
-                            println "Something went wrong."
-                        }
-                        break
-                    case "4":
-                        String companyDescription = inputReader.readNonEmpty(appScanner,
-                                "Company Description: ", "The company description cannot be empty.")
-                        String companyPassword = inputReader.readNonEmpty(appScanner,
-                                "Company Password: ", "The company password cannot be empty.")
-                        String companyEmail = inputReader.readNonEmpty(appScanner,
-                                "Company Email: ", "The company email cannot be empty.")
-                        String companyName = inputReader.readNonEmpty(appScanner,
-                                "Company Name:", "The company name cannot be empty")
-                        String companyCnpj = inputReader.readNonEmpty(appScanner,
-                                "Company CNPJ:", "The company cnpj cannot be empty")
-
-                        String companyState = inputReader.readNonEmpty(appScanner,
-                                "Candidate State:", "Invalid Input. Try again.", 2, 2)
-                        String companyPostalCode = inputReader.readNonEmpty(appScanner,
-                                "Company Postal Code:", "The company postal code cannot be empty", 16)
-                        String companyCountry = inputReader.readNonEmpty(appScanner,
-                                "Company Country:", "The company country cannot be empty")
-                        String companyCity = inputReader.readNonEmpty(appScanner,
-                                "Company City:", "The company city cannot be empty")
-                        String companyStreet = inputReader.readNonEmpty(appScanner,
-                                "Company Street:", "The company street cannot be empty")
-
-                        Company company = companyController.handleCreateCompany(
-                                companyDescription,
-                                companyPassword,
-                                companyEmail,
-                                companyName,
-                                companyCnpj,
-                                companyState,
-                                companyPostalCode,
-                                companyCountry,
-                                companyCity,
-                                companyStreet
-                        )
-                        if (company) {
-                            println "Company added successfully!"
-                        } else {
-                            println "Something went wrong."
-                        }
-                        break
-                    case "5":
-                        List<Company> allCompanies = companyController.handleGetAll()
-                        int idCompany = inputReader.readId(appScanner, allCompanies, "Company Id: ", "idCompany")
-
-                        String jobName = inputReader.readNonEmpty(appScanner,
-                                "Job Name:", "The job name cannot be empty")
-                        String jobDescription = inputReader.readNonEmpty(appScanner,
-                                "Job Description:", "The job description cannot be empty")
-
-                        String jobState = inputReader.readNonEmpty(appScanner,
-                                "Job State:", "Invalid Input. Try again.", 2, 2)
-                        String jobPostalCode = inputReader.readNonEmpty(appScanner,
-                                "Job Postal Code:", "The job postal code cannot be empty", 16)
-                        String jobCountry = inputReader.readNonEmpty(appScanner,
-                                "Job Country:", "The job country cannot be empty")
-                        String jobCity = inputReader.readNonEmpty(appScanner,
-                                "Job City:", "The job city cannot be empty")
-                        String jobStreet = inputReader.readNonEmpty(appScanner,
-                                "Job Street:", "The job street cannot be empty")
-
-                        List<Competency> jobCompetencies = inputReader.readCompetencies(appScanner)
-
-                        Job job = jobController.handleCreateJob(
-                                jobName,
-                                jobDescription,
-                                idCompany,
-                                jobState,
-                                jobPostalCode,
-                                jobCountry,
-                                jobCity,
-                                jobStreet,
-                                jobCompetencies
-                        )
-
-                        if (job) {
-                            println "Job added successfully!"
-                        } else {
-                            println "Something went wrong."
-                        }
-                        break
-                    case "6":
-                        List<Candidate> allCandidates = candidateController.handleGetAll()
-                        allCandidates.forEach { println it }
-                        int idCandidate = inputReader.readId(appScanner, allCandidates, "Candidate Id:", "idCandidate")
-
-                        List<Company> allCompanies = companyController.handleGetAll()
-                        allCompanies.forEach { println it }
-                        int idCompany = inputReader.readId(appScanner, allCompanies, "Company Id: ", "idCompany")
-
-                        List<Job> allJobs = jobController.handleGetAllByCompanyId(idCompany)
-                        if (allJobs.isEmpty()) {
-                            println "This company doesn't have any jobs."
-                            break
-                        }
-                        allJobs.forEach { println it }
-                        int idJob = inputReader.readId(appScanner, allJobs, "Job Id: ")
-
-                        if (candidateController.handleLikeJob(idCandidate, idJob)) {
-                            println "Like added successfully!"
-                        } else {
-                            println "This job is already liked!"
-                        }
-                        break
-                    case "7":
-                        List<Company> allCompanies = companyController.handleGetAll()
-                        allCompanies.forEach { println it }
-                        int idCompany = inputReader.readId(appScanner, allCompanies, "Company Id: ", "idCompany")
-
-                        List<Job> allJobs = jobController.handleGetAllByCompanyId(idCompany)
-                        if (allJobs.isEmpty()) {
-                            println "This company doesn't have any jobs."
-                            break
-                        }
-                        allJobs.forEach { println it }
-                        int idJob = inputReader.readId(appScanner, allJobs, "Job Id: ")
-
-                        List<AnonymousCandidateDTO> anonymousCandidates = candidateController.handleGetAllInterestedInJob(idJob)
-                        if (anonymousCandidates.isEmpty()) {
-                            println "This job doesn't have any likes."
-                            break
-                        }
-                        anonymousCandidates.forEach { println it }
-                        int idCandidate = inputReader.readId(appScanner, anonymousCandidates, "Chose a candidate:")
-                        int response = companyController.handleLikeCandidate(idCompany, idCandidate)
-                        switch (response) {
-                            case 0:
-                                println "This candidate is already matched!"
-                                break
-                            case 1:
-                                println "Like added successfully!"
-                                break
-                            case 2:
-                                println "You Matched successfully with this candidate!"
-                        }
-
-                        if (companyController.handleLikeCandidate(idCompany, idCandidate)) {
-                            println "Like added successfully!"
-                        } else {
-                            println "This candidate is already matched!"
-                        }
-                        break
-                    case "8":
-                        List<Company> allCompanies = companyController.handleGetAll()
-                        allCompanies.forEach { println it }
-                        int idCompany = inputReader.readId(appScanner, allCompanies, "Company Id: ", "idCompany")
-
-                        List<Job> allJobs = jobController.handleGetAllByCompanyId(idCompany)
-                        if (allJobs.isEmpty()) {
-                            println "This company doesn't have any jobs."
-                            break
-                        }
-                        allJobs.forEach { println it }
-                        int idJob = inputReader.readId(appScanner, allJobs, "Job Id: ")
-
-                        List<MatchDTO> allMatches = matchController.handleGetAllMatchesByJobId(idJob)
-                        if (allMatches.isEmpty()) {
-                            println "This job doesn't have any matches."
-                            break
-                        }
-                        allMatches.forEach { println it }
-                        break
-                }
+            Runnable command = commands.get(appInput)
+            if (command) {
+                command.run()
+            } else {
+                println "Invalid option."
             }
         }
+        appScanner.close()
+    }
+
+    private final Map<String, Runnable> commands = ["1": { candidateController.handleGetAll().forEach { println it } },
+                                                    "2": { companyController.handleGetAll().forEach { println it } },
+                                                    "3": this.&createCandidateCase,
+                                                    "4": this.&createCompanyCase,
+                                                    "5": this.&createJobCase,
+                                                    "6": this.&likeJobAsCandidate,
+                                                    "7": this.&likeCandidateAsCompany,
+                                                    "8": this.&listAllMatchesOfJob,
+                                                    "q": { println "Terminating application." }] as Map<String, Runnable>
+
+    private void createCandidateCase() {
+        String candidateDescription = inputReader.readNonEmpty("Description: ", "The description cannot be empty.")
+        String candidatePassword = inputReader.readNonEmpty("Password: ", "The password cannot be empty.")
+        String candidateEmail = inputReader.readNonEmpty("Email: ", "The email cannot be empty.")
+        String candidateFirstName = inputReader.readNonEmpty("First Name: ", "The first name cannot be empty.")
+        String candidateLastName = inputReader.readNonEmpty("Last Name: ", "The last name cannot be empty.")
+        String candidateCpf = inputReader.readNonEmpty("CPF: ", "The CPF cannot be empty.", 11)
+        LocalDate candidateBirthday = inputReader.readDate("Birthday: (yyyy-MM-dd) ", "Invalid date. Try again.")
+        String candidateGraduation = inputReader.readNonEmpty("Graduation: ", "The graduation cannot be empty")
+        Address candidateAddress = inputReader.readAddress()
+        List<Competency> candidateCompetencies = inputReader.readCompetencies()
+
+        CreateCandidateDTO createCandidateDTO = new CreateCandidateDTO(candidateDescription,
+                candidatePassword,
+                candidateEmail,
+                candidateFirstName,
+                candidateLastName,
+                candidateCpf,
+                candidateBirthday,
+                candidateGraduation,
+                candidateAddress,
+                candidateCompetencies)
+
+        Candidate candidate = candidateController.handleCreateCandidate(createCandidateDTO)
+
+        println candidate ? "Candidate added successfully!" : "Something went wrong."
+    }
+
+    private void createCompanyCase() {
+        String companyDescription = inputReader.readNonEmpty("Description: ", "The description cannot be empty.")
+        String companyPassword = inputReader.readNonEmpty("Password: ", "The password cannot be empty.")
+        String companyEmail = inputReader.readNonEmpty("Email: ", "The email cannot be empty.")
+        String companyName = inputReader.readNonEmpty("Name:", "The name cannot be empty")
+        String companyCnpj = inputReader.readNonEmpty("CNPJ:", "The cnpj cannot be empty")
+        Address companyAddress = inputReader.readAddress()
+
+        CreateCompanyDTO createCompanyDTO = new CreateCompanyDTO(companyDescription,
+                companyPassword,
+                companyEmail,
+                companyName,
+                companyCnpj,
+                companyAddress)
+
+        Company company = companyController.handleCreateCompany(createCompanyDTO)
+
+        println company ? "Company added successfully!" : "Something went wrong."
+    }
+
+    private void createJobCase() {
+        int idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+
+        String jobName = inputReader.readNonEmpty("Name:", "The name cannot be empty")
+        String jobDescription = inputReader.readNonEmpty("Description:", "The description cannot be empty")
+        Address jobAddress = inputReader.readAddress()
+        List<Competency> jobCompetencies = inputReader.readCompetencies()
+
+        CreateJobDTO createJobDTO = new CreateJobDTO(jobName,
+                jobDescription,
+                idCompany,
+                jobAddress,
+                jobCompetencies)
+
+        Job job = jobController.handleCreateJob(createJobDTO)
+
+        println job ? "Job added successfully!" : "Something went wrong."
+    }
+
+    private void likeJobAsCandidate() {
+        int idCandidate = selectEntityFromCollection(candidateController.handleGetAll(), "Candidate", "idCandidate")
+        int idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+        int idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
+
+        if (candidateController.handleLikeJob(idCandidate, idJob)) {
+            println "Like added successfully!"
+        } else {
+            println "This job is already liked!"
+        }
+    }
+
+    private void likeCandidateAsCompany() {
+        int idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+        int idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
+        int idCandidate = selectEntityFromCollection(candidateController.handleGetAllInterestedInJob(idJob), "Candidate")
+
+        LikeResult response = companyController.handleLikeCandidate(idCompany, idCandidate)
+        switch (response) {
+            case LikeResult.ALREADY_LIKED:
+                println "This candidate is already matched!"
+                break
+            case LikeResult.SUCCESS:
+                println "Like added successfully!"
+                break
+            case LikeResult.MATCH_FOUND:
+                println "You Matched successfully with this candidate!"
+                break
+        }
+    }
+
+    private void listAllMatchesOfJob() {
+        int idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+        int idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
+
+        List<MatchDTO> allMatches = matchController.handleGetAllMatchesByJobId(idJob)
+        if (isEmptyAndPrint(allMatches, "Matches")) return
+        allMatches.forEach { println it }
+    }
+
+    private <T> int selectEntityFromCollection(List<T> items, String label, String idField = "id") {
+        if (isEmptyAndPrint(items, label)) return -1
+        items.forEach { println it }
+        return inputReader.readId(items, "${label} Id: ", idField)
+    }
+
+    private boolean isEmptyAndPrint(List items, String label) {
+        if (items.isEmpty()) {
+            println "No records found for ${label.toLowerCase()}."
+            return true
+        }
+        return false
     }
 }

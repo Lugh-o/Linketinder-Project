@@ -10,7 +10,6 @@ abstract class Person {
     String passwd
     int idAddress
 
-    // COMPLETO
     Person(int idPerson, String email, String description, String passwd, int idAddress) {
         this.idPerson = idPerson
         this.email = email
@@ -18,7 +17,6 @@ abstract class Person {
         this.passwd = passwd
         this.idAddress = idAddress
     }
-
 
     // SEM idPerson, SEM passwd -- CREATE
     Person(String description, String passwd, String email) {

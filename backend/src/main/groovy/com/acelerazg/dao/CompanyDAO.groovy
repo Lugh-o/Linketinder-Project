@@ -28,29 +28,20 @@ class CompanyDAO extends DAO {
         FROM company c
         INNER JOIN person p ON c.id_person = p.id
         """
-
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
         List<Company> companies = []
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql)
-            response = statement.executeQuery()
-            while (response.next()) {
-                companies.add(new Company(
-                        response.getInt("id_person"),
-                        response.getString("email"),
-                        response.getString("description"),
-                        response.getInt("id_address"),
-                        response.getInt("id_company"),
-                        response.getString("name"),
-                        response.getString("cnpj")
-                ))
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql)
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                companies.add(new Company(resultSet.getInt("id_person"),
+                        resultSet.getString("email"),
+                        resultSet.getString("description"),
+                        resultSet.getInt("id_address"),
+                        resultSet.getInt("id_company"),
+                        resultSet.getString("name"),
+                        resultSet.getString("cnpj")))
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
         }
         return companies
     }
@@ -66,31 +57,24 @@ class CompanyDAO extends DAO {
             INNER JOIN address a ON a.id = p.id_address
             WHERE c.id = ?        
         """
-
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
         Company company = null
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             statement.setInt(1, id)
-            response = statement.executeQuery()
-            if (response.next()) {
-                company = new Company(
-                        response.getInt("id_person"),
-                        response.getString("email"),
-                        response.getString("description"),
-                        response.getString("passwd"),
-                        response.getInt("id_address"),
-                        response.getInt("id_company"),
-                        response.getString("name"),
-                        response.getString("cnpj")
-                )
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    company = new Company(resultSet.getInt("id_person"),
+                            resultSet.getString("email"),
+                            resultSet.getString("description"),
+                            resultSet.getString("passwd"),
+                            resultSet.getInt("id_address"),
+                            resultSet.getInt("id_company"),
+                            resultSet.getString("name"),
+                            resultSet.getString("cnpj"))
+                }
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
         }
         return company
     }
@@ -101,37 +85,29 @@ class CompanyDAO extends DAO {
             (?, ?, ?)
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             company.idAddress = addressDAO.create(connection, address)
             company.idPerson = personDAO.create(connection, company)
 
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-            statement.setString(1, company.name)
             statement.setString(2, company.cnpj)
             statement.setInt(3, company.idPerson)
-            statement.executeUpdate()
-            response = statement.getGeneratedKeys()
 
-            if (response.next()) {
-                company.idCompany = response.getInt(1)
+            statement.executeUpdate()
+            try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                if (resultSet.next()) company.idCompany = resultSet.getInt(1)
             }
             connection.commit()
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e
         } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
-
         return company
-
     }
 
     Company update(int id, Company company, Address address) {
@@ -140,19 +116,16 @@ class CompanyDAO extends DAO {
             WHERE id = ?
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
             Company currentCompany = getById(id)
 
             addressDAO.update(connection, currentCompany.idAddress, address)
             personDAO.update(connection, company)
 
-            statement = connection.prepareStatement(sql)
             statement.setString(1, company.name)
             statement.setString(2, company.cnpj)
             statement.setInt(3, id)
@@ -163,11 +136,9 @@ class CompanyDAO extends DAO {
             if (connection != null) connection.rollback()
             throw e
         } finally {
-            DatabaseHandler.closeQuietly(statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
-
         return getById(id)
-
     }
 
     void delete(int id) {
@@ -188,22 +159,13 @@ class CompanyDAO extends DAO {
             WHERE id_company = ? AND id_candidate = ?;        
         """
 
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
-
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, idCompany)
             statement.setInt(2, idCandidate)
-
-            response = statement.executeQuery()
-            if (response.next()) {
-                return true
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) return true
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
         }
         return false
     }

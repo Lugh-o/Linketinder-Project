@@ -1,6 +1,7 @@
 package com.acelerazg.utils
 
 import com.acelerazg.dao.CompetencyDAO
+import com.acelerazg.model.Address
 import com.acelerazg.model.Competency
 import groovy.transform.CompileStatic
 
@@ -11,16 +12,18 @@ import java.time.format.DateTimeParseException
 @CompileStatic
 class InputReader {
     private final CompetencyDAO competencyDAO
+    private final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private final Scanner appScanner
 
-    InputReader(CompetencyDAO competencyDAO) {
+    InputReader(CompetencyDAO competencyDAO, Scanner appScanner) {
         this.competencyDAO = competencyDAO
+        this.appScanner = appScanner
     }
-    final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    String readNonEmpty(Scanner scanner, String prompt, String errorMessage, int maxLength = 255, int minLength = 0) {
+    String readNonEmpty(String prompt, String errorMessage, int maxLength = 255, int minLength = 0) {
         while (true) {
             println prompt
-            String input = scanner.nextLine().trim()
+            String input = appScanner.nextLine().trim()
             if (input.size() > maxLength || input.size() < minLength) {
                 println errorMessage
                 continue
@@ -29,10 +32,10 @@ class InputReader {
         }
     }
 
-    LocalDate readDate(Scanner scanner, String prompt, String errorMessage) {
+    LocalDate readDate(String prompt, String errorMessage) {
         while (true) {
             println prompt
-            String input = scanner.nextLine().trim()
+            String input = appScanner.nextLine().trim()
             if (input.isEmpty()) {
                 System.out.println(errorMessage)
                 continue
@@ -47,13 +50,12 @@ class InputReader {
         }
     }
 
-    List<Competency> readCompetencies(Scanner appScanner) {
+    List<Competency> readCompetencies() {
         Set<Competency> competencies = new LinkedHashSet<>()
         List<Competency> allCompetencies = competencyDAO.getAll()
         while (true) {
             println "Add competencies: "
-            allCompetencies.forEach { comp ->
-                println "${comp.id}: ${comp.name.replace("_", " ").capitalize()}"
+            allCompetencies.forEach { c -> println "${c.id}: ${c.name.replace("_", " ").capitalize()}"
             }
             println "q: End operation"
 
@@ -69,11 +71,11 @@ class InputReader {
         }
     }
 
-    static <T> int readId(Scanner scanner, List<T> list, String message, String idFieldName = "id") {
+    <T> int readId(List<T> list, String message, String idFieldName = "id") {
         while (true) {
             println message
             try {
-                int id = scanner.nextLine().toInteger()
+                int id = appScanner.nextLine().toInteger()
                 T object = list.stream()
                         .filter(c -> c[idFieldName] == id)
                         .findFirst()
@@ -84,5 +86,15 @@ class InputReader {
                 println "Invalid Id. Try Again"
             }
         }
+    }
+
+    Address readAddress() {
+        String state = readNonEmpty("State:", "Invalid Input. Try again.", 2, 2)
+        String postalCode = readNonEmpty("Postal Code:", "The postal code cannot be empty", 16)
+        String country = readNonEmpty("Country:", "The country cannot be empty")
+        String city = readNonEmpty("City:", "The city cannot be empty")
+        String street = readNonEmpty("Street:", "The street cannot be empty")
+
+        return new Address(state, postalCode, country, city, street)
     }
 }

@@ -12,7 +12,6 @@ class Job {
     int idAddress
     int idCompany
 
-    // COMPLETO
     Job(int id, String name, String description, int idAddress, int idCompany) {
         this.id = id
         this.name = name

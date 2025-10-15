@@ -4,9 +4,11 @@ import com.acelerazg.dao.CandidateDAO
 import com.acelerazg.dao.CompanyDAO
 import com.acelerazg.dao.JobDAO
 import com.acelerazg.dao.MatchEventDAO
+import com.acelerazg.dto.CreateCompanyDTO
 import com.acelerazg.model.Address
 import com.acelerazg.model.Company
 import com.acelerazg.model.Job
+import com.acelerazg.model.LikeResult
 import groovy.transform.CompileStatic
 
 @CompileStatic
@@ -27,38 +29,39 @@ class CompanyController {
         return companyDAO.getAll()
     }
 
-    Company handleCreateCompany(String description, String passwd, String email, String name, String cnpj, String state, String postalCode, String country, String city, String street) {
+    Company handleCreateCompany(CreateCompanyDTO createCompanyDTO) {
 
-        Company company = new Company(
-                description,
-                passwd,
-                email,
-                name,
-                cnpj
-        )
+        Company company = new Company(createCompanyDTO.description,
+                createCompanyDTO.passwd,
+                createCompanyDTO.email,
+                createCompanyDTO.name,
+                createCompanyDTO.cnpj)
 
-        Address address = new Address(
-                state,
-                postalCode,
-                country,
-                city,
-                street
-        )
+        Address address = new Address(createCompanyDTO.address.state,
+                createCompanyDTO.address.postalCode,
+                createCompanyDTO.address.country,
+                createCompanyDTO.address.city,
+                createCompanyDTO.address.street)
 
         return companyDAO.create(company, address)
     }
 
-    int handleLikeCandidate(int idCompany, int idCandidate) {
-        if (companyDAO.isCandidateAlreadyLiked(idCompany, idCandidate)) return 0
+    LikeResult handleLikeCandidate(int idCompany, int idCandidate) {
+        if (companyDAO.isCandidateAlreadyLiked(idCompany, idCandidate)) {
+            return LikeResult.ALREADY_LIKED
+        }
 
         companyDAO.likeCandidate(idCompany, idCandidate)
         List<Job> likedJobs = jobDAO.getAllByCompanyId(idCompany)
-        likedJobs.each { job ->
+
+        boolean matchFound = likedJobs.any { job ->
             if (candidateDAO.hasLikedJob(idCandidate, job.id)) {
                 matchEventDAO.create(job.id, idCandidate)
+                return true
             }
-            return 2
+            return false
         }
-        return 1
+
+        return matchFound ? LikeResult.MATCH_FOUND : LikeResult.SUCCESS
     }
 }

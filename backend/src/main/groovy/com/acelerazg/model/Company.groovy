@@ -28,7 +28,6 @@ class Company extends Person {
         this.idPerson = idPerson
     }
 
-    //Completo
     Company(int idPerson, String email, String description, String passwd, int idAddress, int idCompany, String name, String cnpj) {
         super(idPerson, email, description, passwd, idAddress)
         this.idCompany = idCompany

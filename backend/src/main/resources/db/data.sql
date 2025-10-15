@@ -40,26 +40,26 @@ INSERT INTO job (name, description, id_company, id_address) VALUES
 ('Consultor Financeiro', 'Vaga de consultor', 4, 4),
 ('Desenvolvedor Frontend', 'Vaga de frontend', 5, 5);
 
--- INSERT INTO candidate_like (id_candidate, id_job) VALUES
--- (1,1),
--- (2,2),
--- (3,3),
--- (4,4),
--- (5,5);
+ INSERT INTO candidate_like (id_candidate, id_job) VALUES
+ (1,1),
+ (2,2),
+ (3,3),
+ (4,4),
+ (5,5);
 
--- INSERT INTO company_like (id_company, id_candidate) VALUES
--- (1,1),
--- (2,2),
--- (3,3),
--- (4,4),
--- (5,5);
+ INSERT INTO company_like (id_company, id_candidate) VALUES
+ (1,1),
+ (2,2),
+ (3,3),
+ (4,4),
+ (5,5);
 
--- INSERT INTO match_event (id_job, id_candidate) VALUES
--- (1,1),
--- (2,2),
--- (3,3),
--- (4,4),
--- (5,5);
+ INSERT INTO match_event (id_job, id_candidate) VALUES
+ (1,1),
+ (2,2),
+ (3,3),
+ (4,4),
+ (5,5);
 
 INSERT INTO competency (name) VALUES
 ('JAVA'),

@@ -21,24 +21,18 @@ class MatchEventDAO extends DAO {
             INNER JOIN job j ON me.id_job = j.id
             WHERE j.id = ?;
         """
-        Connection connection = null
-        PreparedStatement statement = null
-        ResultSet response = null
         List<MatchDTO> matches = []
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, idJob)
-            response = statement.executeQuery()
-            while (response.next()) {
-                matches.add(new MatchDTO(
-                        response.getString("candidate_name"),
-                        response.getString("candidate_graduation")
-                ))
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    matches.add(new MatchDTO(resultSet.getString("candidate_name"),
+                            resultSet.getString("candidate_graduation")))
+                }
             }
-        } finally {
-            DatabaseHandler.closeQuietly(response, statement, connection)
         }
         return matches
     }
@@ -48,14 +42,10 @@ class MatchEventDAO extends DAO {
             INSERT INTO match_event (id_job, id_candidate) VALUES
             (?, ?);
         """
-        Connection connection = null
-        PreparedStatement statement = null
+        Connection connection = DatabaseHandler.getConnection()
+        connection.autoCommit = false
 
-        try {
-            connection = DatabaseHandler.getConnection()
-            connection.autoCommit = false
-
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, idJob)
             statement.setInt(2, idCandidate)
             statement.executeUpdate()
@@ -65,7 +55,7 @@ class MatchEventDAO extends DAO {
             if (connection != null) connection.rollback()
             throw e
         } finally {
-            DatabaseHandler.closeQuietly(statement, connection)
+            DatabaseHandler.closeQuietly(connection)
         }
     }
 }

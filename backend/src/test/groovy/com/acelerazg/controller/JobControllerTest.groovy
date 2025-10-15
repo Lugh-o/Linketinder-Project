@@ -3,6 +3,8 @@ package com.acelerazg.controller
 import com.acelerazg.dao.AddressDAO
 import com.acelerazg.dao.CompetencyDAO
 import com.acelerazg.dao.JobDAO
+import com.acelerazg.dto.CreateJobDTO
+import com.acelerazg.model.Address
 import com.acelerazg.model.Competency
 import com.acelerazg.model.Job
 import spock.lang.Specification
@@ -25,9 +27,11 @@ class JobControllerTest extends Specification {
         Job createdJob = new Job(1, 'name', 'description', 3, 2)
         List<Competency> competencies = [new Competency("Java"), new Competency("Python")]
         jobDAO.create(*_) >> createdJob
+        Address createdJobAddress = new Address('BA', '123', 'country', 'city', 'street',)
+        CreateJobDTO createJobDTO = new CreateJobDTO('name', 'description', 2, createdJobAddress, competencies)
 
         when:
-        Job result = controller.handleCreateJob('name', 'description', 2, 'BA', '123', 'country', 'city', 'street', competencies)
+        Job result = controller.handleCreateJob(createJobDTO)
 
         then:
         result != null

@@ -10,6 +10,6 @@ class Main {
     static void main(String[] args) {
         EnvHandler.loadEnv()
         if (!DatabaseHandler.testConnection()) return
-        Menu.openMenu()
+        Menu.run()
     }
 }
