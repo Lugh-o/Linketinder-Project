@@ -1,17 +1,17 @@
 import styles from "./jobListDashboard.module.css";
 
-import { header } from "../../components/header/header";
-import { jobCard } from "../../components/jobCard/jobCard";
+import { companyJobCard } from "../../components/jobCard/companyJobCard";
 import type { Company } from "../../types/Company";
 import addIcon from "../../assets/add.svg";
 import { COMPETENCIES, type Competency } from "../../types/Competency";
 import { store } from "../../Store";
 import { Job } from "../../types/Job";
 import { navigateTo } from "../../utils/router";
+import { companyHeader } from "../../components/header/companyHeader";
 
 export function jobListDashboard(company: Company): HTMLDivElement {
 	const container: HTMLDivElement = document.createElement("div");
-	const headerElement: HTMLElement = header(company);
+	const headerElement: HTMLElement = companyHeader(company);
 	container.appendChild(headerElement);
 
 	const jobListContainer: HTMLDivElement = document.createElement("div");
@@ -134,7 +134,7 @@ export function jobListDashboard(company: Company): HTMLDivElement {
 	newJobButtonWrapper.appendChild(createNewJobButton);
 	container.appendChild(newJobButtonWrapper);
 	company.getJobList().forEach((job) => {
-		const jobCardElement = jobCard(job, company);
+		const jobCardElement = companyJobCard(job, company);
 		jobListContainer.appendChild(jobCardElement);
 	});
 

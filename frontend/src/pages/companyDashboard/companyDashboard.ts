@@ -3,15 +3,15 @@ import styles from "./companyDashboard.module.css";
 import { Chart } from "chart.js/auto";
 
 import { candidateCard } from "../../components/candidateCard/candidateCard";
-import { header } from "../../components/header/header";
 import { store } from "../../Store";
 import type { Company } from "../../types/Company";
 import { COMPETENCIES, type Competency } from "../../types/Competency";
+import { companyHeader } from "../../components/header/companyHeader";
 
 export function companyDashboard(company: Company): HTMLDivElement {
 	const container: HTMLDivElement = document.createElement("div");
 	container.className = styles.companyDashboardContainer;
-	const headerElement: HTMLElement = header(company);
+	const headerElement: HTMLElement = companyHeader(company);
 	container.appendChild(headerElement);
 
 	let data: Record<Competency, number> = {};

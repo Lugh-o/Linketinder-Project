@@ -1,16 +1,13 @@
 import styles from "./header.module.css";
 
-import { Candidate } from "../../types/Candidate";
 import { Company } from "../../types/Company";
-import { Person } from "../../types/Person";
-import PersonIcon from "../../assets/person.svg";
 import CompanyIcon from "../../assets/company.svg";
 import { registrationScreen } from "../../pages/registrationScreen/registrationScreen";
 import { navigateTo } from "../../utils/router";
 import { jobListDashboard } from "../../pages/jobListDashboard/jobListDashboard";
 import { companyDashboard } from "../../pages/companyDashboard/companyDashboard";
 
-export function header(person: Person): HTMLElement {
+export function companyHeader(company: Company): HTMLElement {
 	const container: HTMLElement = document.createElement("header");
 	container.className = styles.headerContainer;
 
@@ -30,32 +27,30 @@ export function header(person: Person): HTMLElement {
 	const profileWrapper: HTMLDivElement = document.createElement("div");
 	profileWrapper.className = styles.profileWrapper;
 	const image: HTMLImageElement = document.createElement("img");
-	if (person instanceof Candidate) {
-		image.src = PersonIcon;
-	} else if (person instanceof Company) {
-		image.src = CompanyIcon;
+	image.src = CompanyIcon;
 
-		const candidatesButton: HTMLButtonElement = document.createElement("button");
-		candidatesButton.textContent = "Ver Candidatos";
-		candidatesButton.className = styles.jobsButton;
-		candidatesButton.addEventListener("click", () => {
-			navigateTo(companyDashboard(person as Company));
-		});
+	const candidatesButton: HTMLButtonElement =
+		document.createElement("button");
+	candidatesButton.textContent = "Ver Candidatos";
+	candidatesButton.className = styles.jobsButton;
+	candidatesButton.addEventListener("click", () => {
+		navigateTo(companyDashboard(company));
+	});
 
-		const jobsButton: HTMLButtonElement = document.createElement("button");
-		jobsButton.textContent = "Ver vagas";
-		jobsButton.className = styles.jobsButton;
-		jobsButton.addEventListener("click", () => {
-			navigateTo(jobListDashboard(person as Company));
-		});
+	const jobsButton: HTMLButtonElement = document.createElement("button");
+	jobsButton.textContent = "Ver vagas";
+	jobsButton.className = styles.jobsButton;
+	jobsButton.addEventListener("click", () => {
+		navigateTo(jobListDashboard(company));
+	});
 
-		appName.appendChild(candidatesButton);
-		appName.appendChild(jobsButton);
-	}
+	appName.appendChild(candidatesButton);
+	appName.appendChild(jobsButton);
+
 	profileWrapper.appendChild(image);
 
 	const name: HTMLHeadingElement = document.createElement("h4");
-	name.textContent = person.name;
+	name.textContent = company.name;
 	profileWrapper.appendChild(name);
 
 	const logoutButton: HTMLButtonElement = document.createElement("button");
