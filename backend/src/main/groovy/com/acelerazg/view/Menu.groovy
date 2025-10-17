@@ -9,8 +9,10 @@ import com.acelerazg.dto.CreateCandidateDTO
 import com.acelerazg.dto.CreateCompanyDTO
 import com.acelerazg.dto.CreateJobDTO
 import com.acelerazg.dto.MatchDTO
+import com.acelerazg.exceptions.EmptyCollectionException
 import com.acelerazg.model.*
-import com.acelerazg.utils.InputReader
+import com.acelerazg.view.input.InputReader
+import com.acelerazg.view.input.InputValidator
 import groovy.transform.CompileStatic
 
 import java.time.LocalDate
@@ -21,8 +23,9 @@ class Menu {
     private final CompanyController companyController
     private final JobController jobController
     private final MatchController matchController
-    private final InputReader inputReader
     private final Scanner appScanner
+    private final InputValidator inputValidator
+    private final InputReader inputReader
 
     Menu() {
         AddressDAO addressDao = new AddressDAO()
@@ -38,7 +41,8 @@ class Menu {
         jobController = new JobController(jobDAO)
         matchController = new MatchController(matchEventDAO)
         appScanner = new Scanner(System.in)
-        inputReader = new InputReader(competencyDao, appScanner)
+        inputValidator = new InputValidator()
+        inputReader = new InputReader(competencyDao, appScanner, inputValidator)
     }
 
     static void run() {
@@ -73,8 +77,8 @@ class Menu {
         appScanner.close()
     }
 
-    private final Map<String, Runnable> commands = ["1": { candidateController.handleGetAll().forEach { println it } },
-                                                    "2": { companyController.handleGetAll().forEach { println it } },
+    private final Map<String, Runnable> commands = ["1": { candidateController.handleGetAll().forEach { Candidate c -> println c } },
+                                                    "2": { companyController.handleGetAll().forEach { Company co -> println co } },
                                                     "3": this.&createCandidateCase,
                                                     "4": this.&createCompanyCase,
                                                     "5": this.&createJobCase,
@@ -84,14 +88,14 @@ class Menu {
                                                     "q": { println "Terminating application." }] as Map<String, Runnable>
 
     private void createCandidateCase() {
-        String candidateDescription = inputReader.readNonEmpty("Description: ", "The description cannot be empty.")
-        String candidatePassword = inputReader.readNonEmpty("Password: ", "The password cannot be empty.")
-        String candidateEmail = inputReader.readNonEmpty("Email: ", "The email cannot be empty.")
-        String candidateFirstName = inputReader.readNonEmpty("First Name: ", "The first name cannot be empty.")
-        String candidateLastName = inputReader.readNonEmpty("Last Name: ", "The last name cannot be empty.")
-        String candidateCpf = inputReader.readNonEmpty("CPF: ", "The CPF cannot be empty.", 11)
-        LocalDate candidateBirthday = inputReader.readDate("Birthday: (yyyy-MM-dd) ", "Invalid date. Try again.")
-        String candidateGraduation = inputReader.readNonEmpty("Graduation: ", "The graduation cannot be empty")
+        String candidateDescription = inputReader.readValidatedString("Description: ")
+        String candidatePassword = inputReader.readValidatedString("Password: ")
+        String candidateEmail = inputReader.readValidatedString("Email: ")
+        String candidateFirstName = inputReader.readValidatedString("First Name: ")
+        String candidateLastName = inputReader.readValidatedString("Last Name: ")
+        String candidateCpf = inputReader.readValidatedString("CPF: ", 11)
+        LocalDate candidateBirthday = inputReader.readDate("Birthday: (yyyy-MM-dd) ")
+        String candidateGraduation = inputReader.readValidatedString("Graduation: ")
         Address candidateAddress = inputReader.readAddress()
         List<Competency> candidateCompetencies = inputReader.readCompetencies()
 
@@ -112,11 +116,11 @@ class Menu {
     }
 
     private void createCompanyCase() {
-        String companyDescription = inputReader.readNonEmpty("Description: ", "The description cannot be empty.")
-        String companyPassword = inputReader.readNonEmpty("Password: ", "The password cannot be empty.")
-        String companyEmail = inputReader.readNonEmpty("Email: ", "The email cannot be empty.")
-        String companyName = inputReader.readNonEmpty("Name:", "The name cannot be empty")
-        String companyCnpj = inputReader.readNonEmpty("CNPJ:", "The cnpj cannot be empty")
+        String companyDescription = inputReader.readValidatedString("Description: ")
+        String companyPassword = inputReader.readValidatedString("Password: ")
+        String companyEmail = inputReader.readValidatedString("Email: ")
+        String companyName = inputReader.readValidatedString("Name:")
+        String companyCnpj = inputReader.readValidatedString("CNPJ:")
         Address companyAddress = inputReader.readAddress()
 
         CreateCompanyDTO createCompanyDTO = new CreateCompanyDTO(companyDescription,
@@ -132,10 +136,17 @@ class Menu {
     }
 
     private void createJobCase() {
-        int idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+        int idCompany
 
-        String jobName = inputReader.readNonEmpty("Name:", "The name cannot be empty")
-        String jobDescription = inputReader.readNonEmpty("Description:", "The description cannot be empty")
+        try {
+            idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+        } catch (EmptyCollectionException e) {
+            println e.message
+            return
+        }
+
+        String jobName = inputReader.readValidatedString("Name:")
+        String jobDescription = inputReader.readValidatedString("Description:")
         Address jobAddress = inputReader.readAddress()
         List<Competency> jobCompetencies = inputReader.readCompetencies()
 
@@ -151,9 +162,18 @@ class Menu {
     }
 
     private void likeJobAsCandidate() {
-        int idCandidate = selectEntityFromCollection(candidateController.handleGetAll(), "Candidate", "idCandidate")
-        int idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
-        int idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
+        int idCandidate
+        int idCompany
+        int idJob
+
+        try {
+            idCandidate = selectEntityFromCollection(candidateController.handleGetAll(), "Candidate", "idCandidate")
+            idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+            idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
+        } catch (EmptyCollectionException e) {
+            println e.message
+            return
+        }
 
         if (candidateController.handleLikeJob(idCandidate, idJob)) {
             println "Like added successfully!"
@@ -163,9 +183,18 @@ class Menu {
     }
 
     private void likeCandidateAsCompany() {
-        int idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
-        int idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
-        int idCandidate = selectEntityFromCollection(candidateController.handleGetAllInterestedInJob(idJob), "Candidate")
+        int idCandidate
+        int idCompany
+        int idJob
+
+        try {
+            idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+            idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
+            idCandidate = selectEntityFromCollection(candidateController.handleGetAllInterestedInJob(idJob), "Candidate")
+        } catch (EmptyCollectionException e) {
+            println e.message
+            return
+        }
 
         LikeResult response = companyController.handleLikeCandidate(idCompany, idCandidate)
         switch (response) {
@@ -182,25 +211,27 @@ class Menu {
     }
 
     private void listAllMatchesOfJob() {
-        int idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
-        int idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
+        int idCompany
+        int idJob
+
+        try {
+            idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+            idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
+        } catch (EmptyCollectionException e) {
+            println e.message
+            return
+        }
 
         List<MatchDTO> allMatches = matchController.handleGetAllMatchesByJobId(idJob)
-        if (isEmptyAndPrint(allMatches, "Matches")) return
-        allMatches.forEach { println it }
+        if (allMatches.isEmpty()) return
+        allMatches.forEach { MatchDTO m -> println m }
     }
 
     private <T> int selectEntityFromCollection(List<T> items, String label, String idField = "id") {
-        if (isEmptyAndPrint(items, label)) return -1
-        items.forEach { println it }
-        return inputReader.readId(items, "${label} Id: ", idField)
-    }
-
-    private boolean isEmptyAndPrint(List items, String label) {
         if (items.isEmpty()) {
-            println "No records found for ${label.toLowerCase()}."
-            return true
+            throw new EmptyCollectionException("No records found for ${label.toLowerCase()}.")
         }
-        return false
+        items.forEach { T it -> println it }
+        return inputReader.readId(items, "${label} Id: ", idField)
     }
 }

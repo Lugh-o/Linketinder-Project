@@ -1,4 +1,4 @@
-package com.acelerazg.persistence
+package com.acelerazg.persistency
 
 import com.acelerazg.utils.EnvHandler
 import groovy.transform.CompileStatic
@@ -6,6 +6,7 @@ import groovy.transform.CompileStatic
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
+import java.sql.Statement
 
 @CompileStatic
 class DatabaseHandler {
@@ -29,7 +30,7 @@ class DatabaseHandler {
     }
 
     static void closeQuietly(AutoCloseable... resources) {
-        resources.each { r ->
+        resources.each { AutoCloseable r ->
             if (r != null) {
                 try {
                     r.close()
@@ -56,11 +57,10 @@ class DatabaseHandler {
             connection = getConnection()
             connection.autoCommit = false
 
-            sql.split(';').each { stmt ->
+            sql.split(';').each { String stmt ->
                 stmt = stmt.trim()
                 if (stmt) {
-                    connection.createStatement().withCloseable { s ->
-                        s.execute(stmt)
+                    connection.createStatement().withCloseable { Statement s -> s.execute(stmt)
                     }
                 }
             }

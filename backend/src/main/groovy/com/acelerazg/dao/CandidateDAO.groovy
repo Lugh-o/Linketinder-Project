@@ -5,7 +5,7 @@ import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Address
 import com.acelerazg.model.Candidate
 import com.acelerazg.model.Competency
-import com.acelerazg.persistence.DatabaseHandler
+import com.acelerazg.persistency.DatabaseHandler
 import groovy.transform.CompileStatic
 
 import java.sql.*
@@ -193,7 +193,7 @@ class CandidateDAO extends DAO {
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
                 if (resultSet.next()) candidate.idCandidate = resultSet.getInt("id")
             }
-            competencies.forEach { createCandidateCompetency(connection, candidate.idCandidate, it) }
+            competencies.forEach { Competency c -> createCandidateCompetency(connection, candidate.idCandidate, c) }
 
             connection.commit()
         } catch (SQLException e) {
@@ -263,7 +263,7 @@ class CandidateDAO extends DAO {
         } catch (SQLException e) {
             throw new DataAccessException("Error updating candidate competencies", e)
         }
-        newCompetencies.forEach { c -> createCandidateCompetency(connection, idCandidate, c)
+        newCompetencies.forEach { Competency c -> createCandidateCompetency(connection, idCandidate, c)
         }
     }
 

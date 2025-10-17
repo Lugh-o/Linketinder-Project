@@ -3,7 +3,7 @@ package com.acelerazg.dao
 import com.acelerazg.model.Address
 import com.acelerazg.model.Competency
 import com.acelerazg.model.Job
-import com.acelerazg.persistence.DatabaseHandler
+import com.acelerazg.persistency.DatabaseHandler
 import groovy.transform.CompileStatic
 
 import java.sql.Connection
@@ -104,7 +104,7 @@ class JobDAO extends DAO {
                 if (resultSet.next()) job.id = resultSet.getInt("id")
             }
 
-            competencies.forEach { createJobCompetency(connection, job.id, it) }
+            competencies.forEach {Competency c -> createJobCompetency(connection, job.id, c) }
 
             connection.commit()
         } catch (Exception e) {
@@ -167,7 +167,7 @@ class JobDAO extends DAO {
             deleteStatement.setInt(1, jobId)
             deleteStatement.executeUpdate()
         }
-        newCompetencies.forEach { c -> createJobCompetency(connection, jobId, c)
+        newCompetencies.forEach { Competency c -> createJobCompetency(connection, jobId, c)
         }
     }
 

@@ -2,7 +2,7 @@ package com.acelerazg.dao
 
 import com.acelerazg.model.Address
 import com.acelerazg.model.Company
-import com.acelerazg.persistence.DatabaseHandler
+import com.acelerazg.persistency.DatabaseHandler
 import groovy.transform.CompileStatic
 
 import java.sql.Connection

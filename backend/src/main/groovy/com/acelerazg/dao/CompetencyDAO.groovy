@@ -1,7 +1,7 @@
 package com.acelerazg.dao
 
 import com.acelerazg.model.Competency
-import com.acelerazg.persistence.DatabaseHandler
+import com.acelerazg.persistency.DatabaseHandler
 import groovy.transform.CompileStatic
 
 import java.sql.Connection

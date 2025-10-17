@@ -1,4 +1,4 @@
-package com.acelerazg.persistence
+package com.acelerazg.persistency
 
 import com.acelerazg.utils.EnvHandler
 
