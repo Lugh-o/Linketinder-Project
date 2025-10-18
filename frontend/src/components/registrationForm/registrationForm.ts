@@ -1,5 +1,5 @@
 import { registrationFormCompany } from "./registrationFormCompany";
-import { createCandidateForm } from "./registrationFormCandidate";
+import { registrationFormCandidate } from "./registrationFormCandidate";
 import styles from "./registrationForm.module.css";
 import switchControls from "../switchControls/switchControls";
 
@@ -12,7 +12,7 @@ export function registrationForm(): HTMLElement {
 
 	function showCandidateForm(): void {
 		formArea.innerHTML = "";
-		formArea.appendChild(createCandidateForm());
+		formArea.appendChild(registrationFormCandidate());
 	}
 
 	function showCompanyForm(): void {
@@ -28,7 +28,6 @@ export function registrationForm(): HTMLElement {
 	container.appendChild(switchRegistrationControls);
 	container.appendChild(formArea);
 
-	// default
 	showCandidateForm();
 
 	return container;

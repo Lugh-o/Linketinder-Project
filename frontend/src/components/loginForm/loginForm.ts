@@ -25,7 +25,6 @@ export function loginForm(): HTMLDivElement {
 	container.appendChild(switchLoginControls);
 	container.appendChild(formArea);
 
-	// default
 	showCandidateLogin();
 
 	return container;

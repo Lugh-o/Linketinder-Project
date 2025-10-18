@@ -1,75 +1,69 @@
-import styles from "./jobCard.module.css";
 import type { Job } from "../../types/Job";
+import type { Candidate } from "../../types/Candidate";
+import {
+	createCommonElements,
+	addInfoBubble,
+	computeAffinity,
+	createJobCardButton,
+} from "./jobCardHelper";
+import styles from "./jobCard.module.css";
 import thumbsUp from "../../assets/thumbsUp.svg";
 import thumbsDown from "../../assets/thumbsDown.svg";
-import { Candidate } from "../../types/Candidate";
-import { createBubble, createCommonElements } from "./jobCard";
 
 export function candidateJobCard(
 	job: Job,
 	candidate: Candidate
 ): HTMLDivElement {
-	const commonElements: HTMLDivElement[] = createCommonElements(job);
-	const container: HTMLDivElement = commonElements[0];
-	const controlsWrapper: HTMLDivElement = commonElements[1];
-	const firstColumn: HTMLDivElement = commonElements[2];
-	const nameAffinityWrapper: HTMLDivElement = commonElements[3];
-	const competencyWrapper: HTMLDivElement = commonElements[4];
+	const {
+		container,
+		controlsWrapper,
+		firstColumn,
+		nameAffinityWrapper,
+		competencyWrapper,
+	} = createCommonElements(job);
 
-	const likeButton: HTMLButtonElement = document.createElement("button");
-	const likeImage: HTMLImageElement = document.createElement("img");
-	likeImage.src = thumbsUp;
-	likeButton.appendChild(likeImage);
-	likeButton.classList.add(styles.button, styles.likeButton);
+	createJobCardButton(controlsWrapper, thumbsUp, styles.likeButton);
 
-	const dislikeButton: HTMLButtonElement = document.createElement("button");
-	const dislikeImage: HTMLImageElement = document.createElement("img");
-	dislikeImage.src = thumbsDown;
-	dislikeButton.appendChild(dislikeImage);
-	dislikeButton.classList.add(styles.button, styles.dislikeButton);
+	createJobCardButton(controlsWrapper, thumbsDown, styles.dislikeButton);
 
-	controlsWrapper.appendChild(likeButton);
-	controlsWrapper.appendChild(dislikeButton);
+	const affinityContainer: HTMLDivElement = createAffinityContainer(
+		candidate,
+		job
+	);
 
-	let selfCompetencies = candidate.competencies;
-	let jobCompetencies = job.competencies;
+	nameAffinityWrapper.appendChild(affinityContainer);
 
-	let competencyCount = jobCompetencies.length;
-	let matchingCompetencyCount = 0;
-
-	jobCompetencies.forEach((comp) => {
-		if (selfCompetencies.includes(comp)) {
-			matchingCompetencyCount++;
-		}
-	});
-
-	let affinityIndex = matchingCompetencyCount / competencyCount;
-
-	const affinityIndexContainer: HTMLDivElement =
-		document.createElement("div");
-	affinityIndexContainer.className = styles.affinityContainer;
-
-	const affinityBarBackground: HTMLDivElement = document.createElement("div");
-	affinityBarBackground.className = styles.affinityBarBackground;
-
-	const affinityBarFill: HTMLDivElement = document.createElement("div");
-	affinityBarFill.className = styles.affinityBarFill;
-	affinityBarFill.style.width = `${affinityIndex * 100}%`;
-
-	const affinityLabel: HTMLElement = document.createElement("span");
-	affinityLabel.className = styles.affinityLabel;
-	affinityLabel.textContent = `${Math.round(affinityIndex * 100)}%`;
-
-	affinityBarBackground.appendChild(affinityBarFill);
-	affinityIndexContainer.appendChild(affinityBarBackground);
-	affinityIndexContainer.appendChild(affinityLabel);
-	nameAffinityWrapper.appendChild(affinityIndexContainer);
 	firstColumn.appendChild(nameAffinityWrapper);
 	firstColumn.appendChild(competencyWrapper);
 	container.appendChild(firstColumn);
 	container.appendChild(controlsWrapper);
 
-	createBubble(container, job);
+	addInfoBubble(container, job.description);
 
 	return container;
+}
+
+function createAffinityContainer(
+	candidate: Candidate,
+	job: Job
+): HTMLDivElement {
+	const affinityContainer: HTMLDivElement = document.createElement("div");
+	affinityContainer.className = styles.affinityContainer;
+
+	const affinity = computeAffinity(candidate.competencies, job.competencies);
+	const barBackground: HTMLDivElement = document.createElement("div");
+	barBackground.className = styles.affinityBarBackground;
+
+	const barFill: HTMLDivElement = document.createElement("div");
+	barFill.className = styles.affinityBarFill;
+	barFill.style.width = `${affinity * 100}%`;
+
+	const label: HTMLElement = document.createElement("span");
+	label.className = styles.affinityLabel;
+	label.textContent = `${Math.round(affinity * 100)}%`;
+
+	barBackground.appendChild(barFill);
+	affinityContainer.appendChild(barBackground);
+	affinityContainer.appendChild(label);
+	return affinityContainer;
 }

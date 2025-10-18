@@ -7,45 +7,7 @@ import { navigateTo } from "../../utils/router";
 import { candidateDashboard } from "../../pages/candidateDashboard/candidateDashboard";
 import { store } from "../../Store";
 
-function createCompetencyCheckboxes(name: string): HTMLDivElement {
-	const wrapper: HTMLDivElement = document.createElement("div");
-	wrapper.className = styles.formField;
-
-	const label: HTMLSpanElement = document.createElement("span");
-	label.textContent = "Competências";
-	wrapper.appendChild(label);
-
-	const competencyListWrapper: HTMLDivElement = document.createElement("div");
-	competencyListWrapper.className = styles.competencyListWrapper;
-
-	COMPETENCIES.forEach((competency: Competency) => {
-		const checkboxWrapper: HTMLLabelElement =
-			document.createElement("label");
-		checkboxWrapper.className = styles.checkboxWrapper;
-
-		const input: HTMLInputElement = document.createElement("input");
-		input.type = "checkbox";
-		input.name = name;
-		input.value = competency;
-
-		const span: HTMLSpanElement = document.createElement("span");
-		span.textContent = competency.replace("_", " ");
-
-		checkboxWrapper.appendChild(input);
-		checkboxWrapper.appendChild(span);
-		competencyListWrapper.appendChild(checkboxWrapper);
-	});
-
-	wrapper.appendChild(competencyListWrapper);
-
-	const error: HTMLSpanElement = document.createElement("span");
-	error.className = styles.errorMessage;
-	wrapper.appendChild(error);
-
-	return wrapper;
-}
-
-export function createCandidateForm(): HTMLElement {
+export function registrationFormCandidate(): HTMLElement {
 	const form: HTMLFormElement = document.createElement("form");
 
 	const fields: FieldConfig[] = [
@@ -167,4 +129,42 @@ export function createCandidateForm(): HTMLElement {
 		navigateTo(candidateDashboard(candidate));
 	});
 	return form;
+}
+
+function createCompetencyCheckboxes(name: string): HTMLDivElement {
+	const wrapper: HTMLDivElement = document.createElement("div");
+	wrapper.className = styles.formField;
+
+	const label: HTMLSpanElement = document.createElement("span");
+	label.textContent = "Competências";
+	wrapper.appendChild(label);
+
+	const competencyListWrapper: HTMLDivElement = document.createElement("div");
+	competencyListWrapper.className = styles.competencyListWrapper;
+
+	COMPETENCIES.forEach((competency: Competency) => {
+		const checkboxWrapper: HTMLLabelElement =
+			document.createElement("label");
+		checkboxWrapper.className = styles.checkboxWrapper;
+
+		const input: HTMLInputElement = document.createElement("input");
+		input.type = "checkbox";
+		input.name = name;
+		input.value = competency;
+
+		const span: HTMLSpanElement = document.createElement("span");
+		span.textContent = competency.replace("_", " ");
+
+		checkboxWrapper.appendChild(input);
+		checkboxWrapper.appendChild(span);
+		competencyListWrapper.appendChild(checkboxWrapper);
+	});
+
+	wrapper.appendChild(competencyListWrapper);
+
+	const error: HTMLSpanElement = document.createElement("span");
+	error.className = styles.errorMessage;
+	wrapper.appendChild(error);
+
+	return wrapper;
 }

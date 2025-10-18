@@ -34,14 +34,23 @@ export function companyDashboard(company: Company): HTMLDivElement {
 		});
 	});
 
+	const canvaContainer: HTMLDivElement = createCanva(data);
+	scrollableContainer.appendChild(canvaContainer);
+
+	scrollableContainer.appendChild(candidateListContainer);
+	container.appendChild(scrollableContainer);
+	return container;
+}
+
+function createCanva(data: Record<Competency, number>): HTMLDivElement {
+	const canvaContainer: HTMLDivElement = document.createElement("div");
+	canvaContainer.className = styles.canvaContainer;
+
 	const entries = Object.entries(data).filter(([_, count]) => count > 0);
 	entries.sort((a, b) => b[1] - a[1]);
 
 	const labels: string[] = entries.map(([label]) => label);
 	const values: number[] = entries.map(([_, count]) => count);
-
-	const canvaContainer: HTMLDivElement = document.createElement("div");
-	canvaContainer.className = styles.canvaContainer;
 
 	const canvas: HTMLCanvasElement = document.createElement("canvas");
 	new Chart(canvas, {
@@ -67,15 +76,14 @@ export function companyDashboard(company: Company): HTMLDivElement {
 				tooltip: { enabled: true },
 			},
 			scales: {
-				x: { ticks: { display: false }, grid: { drawTicks: false } },
+				x: {
+					ticks: { display: false },
+					grid: { drawTicks: false },
+				},
 				y: { ticks: { display: true }, grid: { drawTicks: false } },
 			},
 		},
 	});
 	canvaContainer.appendChild(canvas);
-	scrollableContainer.appendChild(canvaContainer);
-
-	scrollableContainer.appendChild(candidateListContainer);
-	container.appendChild(scrollableContainer);
-	return container;
+	return canvaContainer;
 }

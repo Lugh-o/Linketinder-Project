@@ -4,30 +4,40 @@ import { registrationForm } from "../../components/registrationForm/registration
 import { loginForm } from "../../components/loginForm/loginForm";
 
 export function registrationScreen(): HTMLDivElement {
-	const container: HTMLDivElement = document.createElement("div");
+	const container = createScreenContainer();
+	const header = createHeader();
+	const registration = registrationForm();
+	const login = loginForm();
+
+	header.appendChild(login);
+	container.appendChild(header);
+	container.appendChild(registration);
+
+	return container;
+}
+
+function createScreenContainer(): HTMLDivElement {
+	const container = document.createElement("div");
 	container.className = styles.registrationScreen;
+	return container;
+}
 
-	const titleContainer: HTMLElement = document.createElement("header");
-	titleContainer.className = styles.registrationTitleContainer;
+function createHeader(): HTMLElement {
+	const header = document.createElement("header");
+	header.className = styles.registrationTitleContainer;
 
-	const appName: HTMLHeadingElement = document.createElement("h1");
-	const title1: HTMLSpanElement = document.createElement("span");
+	const appName = document.createElement("h1");
+	const title1 = document.createElement("span");
 	title1.textContent = "Linke";
 	title1.classList.add(styles.registrationTitle, styles.registrationTitle1);
 
-	const title2: HTMLSpanElement = document.createElement("span");
+	const title2 = document.createElement("span");
 	title2.textContent = "Tinder";
 	title2.classList.add(styles.registrationTitle, styles.registrationTitle2);
 
 	appName.appendChild(title1);
 	appName.appendChild(title2);
-	titleContainer.appendChild(appName);
+	header.appendChild(appName);
 
-	const registration: HTMLElement = registrationForm();
-	const login: HTMLDivElement = loginForm();
-	titleContainer.appendChild(login);
-	container.appendChild(titleContainer);
-	container.appendChild(registration);
-
-	return container;
+	return header;
 }

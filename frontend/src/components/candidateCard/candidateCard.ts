@@ -13,6 +13,17 @@ export function candidateCard(candidate: Candidate): HTMLDivElement {
 	title.textContent = `${candidate.graduation}`;
 	container.appendChild(title);
 
+	attachCompetencyContainer(container, candidate);
+	attachControls(container);
+	attachInfoBubble(container, candidate);
+
+	return container;
+}
+
+function attachCompetencyContainer(
+	container: HTMLDivElement,
+	candidate: Candidate
+) {
 	const competencyContainer: HTMLDivElement = document.createElement("div");
 	competencyContainer.className = styles.competencyWrapper;
 	candidate.competencies.forEach((competency) => {
@@ -20,7 +31,9 @@ export function candidateCard(candidate: Candidate): HTMLDivElement {
 		competencyContainer.appendChild(bubble);
 	});
 	container.appendChild(competencyContainer);
+}
 
+function attachControls(container: HTMLDivElement) {
 	const controlsWrapper: HTMLDivElement = document.createElement("div");
 	controlsWrapper.className = styles.companyControlsWrapper;
 	const likeButton: HTMLButtonElement = document.createElement("button");
@@ -38,7 +51,9 @@ export function candidateCard(candidate: Candidate): HTMLDivElement {
 	controlsWrapper.appendChild(likeButton);
 	controlsWrapper.appendChild(dislikeButton);
 	container.appendChild(controlsWrapper);
+}
 
+function attachInfoBubble(container: HTMLDivElement, candidate: Candidate) {
 	const infoBubble: HTMLDivElement = document.createElement("div");
 	infoBubble.className = styles.candidateInfo;
 	infoBubble.textContent = `${candidate.description}`;
@@ -58,8 +73,5 @@ export function candidateCard(candidate: Candidate): HTMLDivElement {
 			infoBubble.style.marginRight = "0";
 		}
 	});
-
 	container.appendChild(infoBubble);
-
-	return container;
 }
