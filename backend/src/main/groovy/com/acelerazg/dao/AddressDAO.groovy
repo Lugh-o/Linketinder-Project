@@ -26,8 +26,7 @@ class AddressDAO {
                 if (resultSet.next()) idAddress = resultSet.getInt(1)
             }
 
-        } catch (SQLException e) {
-            if (connection != null) connection.rollback()
+        } catch (Exception e) {
             throw new DataAccessException("Error creating address", e)
         }
         return idAddress
@@ -47,8 +46,7 @@ class AddressDAO {
             statement.setString(5, address.street)
             statement.setInt(6, id)
             statement.executeUpdate()
-        } catch (SQLException e) {
-            if (connection != null) connection.rollback()
+        } catch (Exception e) {
             throw new DataAccessException("Error updating address", e)
         }
     }

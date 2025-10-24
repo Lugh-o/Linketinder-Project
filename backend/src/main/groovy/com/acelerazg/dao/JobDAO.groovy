@@ -41,11 +41,14 @@ class JobDAO extends DAO {
             statement.setInt(1, id)
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    jobs.add(new Job(resultSet.getInt("id"),
-                            resultSet.getString("name"),
-                            resultSet.getString("description"),
-                            resultSet.getInt("id_address"),
-                            resultSet.getInt("id_company")))
+                    Job j = Job.builder()
+                            .id(resultSet.getInt("id"))
+                            .name(resultSet.getString("name"))
+                            .description(resultSet.getString("description"))
+                            .idAddress(resultSet.getInt("id_address"))
+                            .idCompany(resultSet.getInt("id_company"))
+                            .build()
+                    jobs.add(j)
                 }
             }
         }
@@ -71,11 +74,13 @@ class JobDAO extends DAO {
             statement.setInt(1, id)
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    job = new Job(resultSet.getInt("id"),
-                            resultSet.getString("name"),
-                            resultSet.getString("description"),
-                            resultSet.getInt("id_address"),
-                            resultSet.getInt("id_company"))
+                    job = Job.builder()
+                            .id(resultSet.getInt("id"))
+                            .name(resultSet.getString("name"))
+                            .description(resultSet.getString("description"))
+                            .idAddress(resultSet.getInt("id_address"))
+                            .idCompany(resultSet.getInt("id_company"))
+                            .build()
                 }
             }
         }
@@ -104,7 +109,7 @@ class JobDAO extends DAO {
                 if (resultSet.next()) job.id = resultSet.getInt("id")
             }
 
-            competencies.forEach {Competency c -> createJobCompetency(connection, job.id, c) }
+            competencies.forEach { Competency c -> createJobCompetency(connection, job.id, c) }
 
             connection.commit()
         } catch (Exception e) {

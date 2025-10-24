@@ -102,8 +102,31 @@ class InputValidatorTest extends Specification {
     def "IsValidId with valid input"() {
         given:
         String input = "2"
-        Candidate fake1 = new Candidate(1, "mail", "desc", 1, 1, "First", "Last", "123", LocalDate.now(), "CS")
-        Candidate fake2 = new Candidate(2, "mail", "desc", 1, 2, "First", "Last", "123", LocalDate.now(), "CS")
+        Candidate fake1 = Candidate.builder()
+                .idPerson(1)
+                .email("mail")
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(1)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
+
+        Candidate fake2 = Candidate.builder()
+                .idPerson(2)
+                .email("mail")
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(2)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
         List<Candidate> list = [fake1, fake2]
 
         when:
@@ -117,8 +140,31 @@ class InputValidatorTest extends Specification {
     def "IsValidId with out of bounds input"() {
         given:
         String input = "10"
-        Candidate fake1 = new Candidate(1, "mail", "desc", 1, 1, "First", "Last", "123", LocalDate.now(), "CS")
-        Candidate fake2 = new Candidate(2, "mail", "desc", 1, 2, "First", "Last", "123", LocalDate.now(), "CS")
+        Candidate fake1 = Candidate.builder()
+                .idPerson(1)
+                .email("mail")
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(1)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
+
+        Candidate fake2 = Candidate.builder()
+                .idPerson(1)
+                .email("mail")
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(1)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
         List<Candidate> list = [fake1, fake2]
 
         when:
@@ -132,8 +178,31 @@ class InputValidatorTest extends Specification {
     def "IsValidId with out of bad input"() {
         given:
         String input = "qweqweqweqew"
-        Candidate fake1 = new Candidate(1, "mail", "desc", 1, 1, "First", "Last", "123", LocalDate.now(), "CS")
-        Candidate fake2 = new Candidate(2, "mail", "desc", 1, 2, "First", "Last", "123", LocalDate.now(), "CS")
+        Candidate fake1 = Candidate.builder()
+                .idPerson(1)
+                .email("mail")
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(1)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
+
+        Candidate fake2 = Candidate.builder()
+                .idPerson(1)
+                .email("mail")
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(1)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
         List<Candidate> list = [fake1, fake2]
 
         when:

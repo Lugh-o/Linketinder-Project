@@ -9,7 +9,6 @@ import com.acelerazg.persistency.DatabaseHandler
 import groovy.transform.CompileStatic
 
 import java.sql.*
-import java.time.LocalDate
 
 @CompileStatic
 class CandidateDAO extends DAO {
@@ -38,18 +37,21 @@ class CandidateDAO extends DAO {
              PreparedStatement statement = connection.prepareStatement(sql)
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                candidates.add(new Candidate(resultSet.getInt("id_person"),
-                        resultSet.getString("email"),
-                        resultSet.getString("description"),
-                        resultSet.getInt("id_address"),
-                        resultSet.getInt("id_candidate"),
-                        resultSet.getString("first_name"),
-                        resultSet.getString("last_name"),
-                        resultSet.getString("cpf"),
-                        LocalDate.parse(resultSet.getString("birthday")),
-                        resultSet.getString("graduation")))
+                Candidate ca = Candidate.builder()
+                        .idPerson(resultSet.getInt("id_person"))
+                        .email(resultSet.getString("email"))
+                        .description(resultSet.getString("description"))
+                        .idAddress(resultSet.getInt("id_address"))
+                        .idCandidate(resultSet.getInt("id_candidate"))
+                        .firstName(resultSet.getString("first_name"))
+                        .lastName(resultSet.getString("last_name"))
+                        .cpf(resultSet.getString("cpf"))
+                        .birthday(resultSet.getDate("birthday").toLocalDate())
+                        .graduation(resultSet.getString("graduation"))
+                        .build()
+                candidates.add(ca)
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new DataAccessException("Error fetching candidates", e)
         }
         return candidates
@@ -62,19 +64,22 @@ class CandidateDAO extends DAO {
             statement.setObject(1, param)
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (!resultSet.next()) return null
-                return new Candidate(resultSet.getInt("id_person"),
-                        resultSet.getString("email"),
-                        resultSet.getString("description"),
-                        resultSet.getString("passwd"),
-                        resultSet.getInt("id_address"),
-                        resultSet.getInt("id_candidate"),
-                        resultSet.getString("first_name"),
-                        resultSet.getString("last_name"),
-                        resultSet.getString("cpf"),
-                        resultSet.getDate("birthday").toLocalDate(),
-                        resultSet.getString("graduation"))
+                Candidate ca = Candidate.builder()
+                        .idPerson(resultSet.getInt("id_person"))
+                        .email(resultSet.getString("email"))
+                        .description(resultSet.getString("description"))
+                        .passwd(resultSet.getString("passwd"))
+                        .idAddress(resultSet.getInt("id_address"))
+                        .idCandidate(resultSet.getInt("id_candidate"))
+                        .firstName(resultSet.getString("first_name"))
+                        .lastName(resultSet.getString("last_name"))
+                        .cpf(resultSet.getString("cpf"))
+                        .birthday(resultSet.getDate("birthday").toLocalDate())
+                        .graduation(resultSet.getString("graduation"))
+                        .build()
+                return ca
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new DataAccessException("Error fetching candidate", e)
         }
     }
@@ -139,11 +144,11 @@ class CandidateDAO extends DAO {
                             resultSet.getString("candidate_competencies")
                                     .split(',')
                                     .collect { it.trim() }
-                                    .collect { new Competency(it) }))
+                                    .collect { Competency.builder().name(it).build() }))
                 }
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new DataAccessException("Error fetching candidates", e)
         }
         return candidates
@@ -164,7 +169,7 @@ class CandidateDAO extends DAO {
                 if (resultSet.next()) return true
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new DataAccessException("Error fetching likes", e)
         }
         return false
@@ -196,7 +201,7 @@ class CandidateDAO extends DAO {
             competencies.forEach { Competency c -> createCandidateCompetency(connection, candidate.idCandidate, c) }
 
             connection.commit()
-        } catch (SQLException e) {
+        } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw new DataAccessException("Error creating candidate", e)
         } finally {
@@ -214,7 +219,7 @@ class CandidateDAO extends DAO {
             statement.setInt(1, idCandidate)
             statement.setInt(2, existing.id)
             statement.executeUpdate()
-        } catch (SQLException e) {
+        } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw new DataAccessException("Error creating candidate competency", e)
         }
@@ -245,7 +250,7 @@ class CandidateDAO extends DAO {
             statement.executeUpdate()
 
             connection.commit()
-        } catch (SQLException e) {
+        } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw new DataAccessException("Error updating candidate", e)
         } finally {
@@ -260,7 +265,7 @@ class CandidateDAO extends DAO {
         try (PreparedStatement deleteStatement = connection.prepareStatement(deleteSql)) {
             deleteStatement.setInt(1, idCandidate)
             deleteStatement.executeUpdate()
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new DataAccessException("Error updating candidate competencies", e)
         }
         newCompetencies.forEach { Competency c -> createCandidateCompetency(connection, idCandidate, c)
@@ -294,7 +299,7 @@ class CandidateDAO extends DAO {
                 if (response.next()) return true
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new DataAccessException("Error fetching like", e)
         }
         return false

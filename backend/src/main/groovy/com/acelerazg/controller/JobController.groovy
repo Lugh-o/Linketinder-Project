@@ -16,15 +16,19 @@ class JobController {
 
     Job handleCreateJob(CreateJobDTO createJobDTO) {
 
-        Job job = new Job(createJobDTO.name,
-                createJobDTO.description,
-                createJobDTO.idCompany)
+        Job job = Job.builder()
+                .name(createJobDTO.name)
+                .description(createJobDTO.description)
+                .idCompany(createJobDTO.idCompany)
+                .build()
 
-        Address address = new Address(createJobDTO.address.state,
-                createJobDTO.address.postalCode,
-                createJobDTO.address.country,
-                createJobDTO.address.city,
-                createJobDTO.address.street)
+        Address address = Address.builder()
+                .state(createJobDTO.address.state)
+                .postalCode(createJobDTO.address.postalCode)
+                .country(createJobDTO.address.country)
+                .city(createJobDTO.address.city)
+                .street(createJobDTO.address.street)
+                .build()
 
         return jobDAO.create(job, address, createJobDTO.competencies)
     }

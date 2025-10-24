@@ -29,8 +29,25 @@ class CompanyControllerTest extends Specification {
 
     def "HandleGetAll"() {
         given:
-        Company fake1 = new Company(1, 'email', 'description', 1, 2, 'name', 'cnpj')
-        Company fake2 = new Company(1, 'email', 'description', 1, 2, 'name', 'cnpj')
+        Company fake1 = Company.builder()
+                .idPerson(1)
+                .email("email")
+                .description("description")
+                .idAddress(1)
+                .idCompany(2)
+                .name("name")
+                .cnpj("cnpj")
+                .build()
+        Company fake2 = Company.builder()
+                .idPerson(1)
+                .email("email")
+                .description("description")
+                .idAddress(1)
+                .idCompany(2)
+                .name("name")
+                .cnpj("cnpj")
+                .build()
+
         companyDAO.getAll() >> [fake1, fake2]
 
         when:
@@ -43,9 +60,23 @@ class CompanyControllerTest extends Specification {
 
     def "HandleCreateCompany"() {
         given:
-        Company createdCompany = new Company('description', 'password', 'email', 'name', 'cnpj')
+        Company createdCompany = Company.builder()
+                .email("email")
+                .description("description")
+                .name("name")
+                .cnpj("cnpj")
+                .build()
+
         companyDAO.create(*_) >> createdCompany
-        Address createdCompanyAddress = new Address('state', 'postalCode', 'country', 'city', 'street')
+
+        Address createdCompanyAddress = Address.builder()
+                .state("State")
+                .postalCode("12345")
+                .country("Country")
+                .city("City")
+                .street("Street")
+                .build()
+
         CreateCompanyDTO createCompanyDTO = new CreateCompanyDTO('description', 'password', 'email', 'name', 'cnpj', createdCompanyAddress)
 
         when:

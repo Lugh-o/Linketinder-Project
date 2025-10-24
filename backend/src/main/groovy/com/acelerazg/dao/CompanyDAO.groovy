@@ -34,13 +34,15 @@ class CompanyDAO extends DAO {
              PreparedStatement statement = connection.prepareStatement(sql)
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                companies.add(new Company(resultSet.getInt("id_person"),
-                        resultSet.getString("email"),
-                        resultSet.getString("description"),
-                        resultSet.getInt("id_address"),
-                        resultSet.getInt("id_company"),
-                        resultSet.getString("name"),
-                        resultSet.getString("cnpj")))
+                Company co = Company.builder()
+                        .idPerson(resultSet.getInt("id_person"))
+                        .email(resultSet.getString("email"))
+                        .description(resultSet.getString("description"))
+                        .idAddress(resultSet.getInt("id_address"))
+                        .idCompany(resultSet.getInt("id_company"))
+                        .cnpj(resultSet.getString("cnpj"))
+                        .build()
+                companies.add(co)
             }
         }
         return companies
@@ -65,14 +67,16 @@ class CompanyDAO extends DAO {
             statement.setInt(1, id)
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    company = new Company(resultSet.getInt("id_person"),
-                            resultSet.getString("email"),
-                            resultSet.getString("description"),
-                            resultSet.getString("passwd"),
-                            resultSet.getInt("id_address"),
-                            resultSet.getInt("id_company"),
-                            resultSet.getString("name"),
-                            resultSet.getString("cnpj"))
+                    company = Company.builder()
+                            .idPerson(resultSet.getInt("id_person"))
+                            .email(resultSet.getString("email"))
+                            .description(resultSet.getString("description"))
+                            .passwd(resultSet.getString("passwd"))
+                            .idAddress(resultSet.getInt("id_address"))
+                            .idCompany(resultSet.getInt("id_company"))
+                            .name(resultSet.getString("name"))
+                            .cnpj(resultSet.getString("cnpj"))
+                            .build()
                 }
             }
         }
@@ -93,6 +97,7 @@ class CompanyDAO extends DAO {
             company.idAddress = addressDAO.create(connection, address)
             company.idPerson = personDAO.create(connection, company)
 
+            statement.setString(1, company.name)
             statement.setString(2, company.cnpj)
             statement.setInt(3, company.idPerson)
 

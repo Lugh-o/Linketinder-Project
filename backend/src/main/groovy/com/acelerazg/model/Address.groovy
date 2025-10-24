@@ -1,5 +1,6 @@
 package com.acelerazg.model
 
+import com.acelerazg.model.builder.AddressBuilder
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
@@ -18,5 +19,9 @@ class Address {
         this.country = country
         this.city = city
         this.street = street
+    }
+
+    static AddressBuilder builder() {
+        return new AddressBuilder()
     }
 }

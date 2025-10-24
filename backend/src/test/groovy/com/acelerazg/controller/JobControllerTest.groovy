@@ -24,10 +24,24 @@ class JobControllerTest extends Specification {
 
     def "HandleCreateJob"() {
         given:
-        Job createdJob = new Job(1, 'name', 'description', 3, 2)
-        List<Competency> competencies = [new Competency("Java"), new Competency("Python")]
+        Job createdJob = Job.builder()
+                .id(1)
+                .name("name")
+                .description("description")
+                .idAddress(3)
+                .idCompany(2)
+                .build()
+        List<Competency> competencies = [Competency.builder().name("Java").build(), Competency.builder().name("Python").build()]
         jobDAO.create(*_) >> createdJob
-        Address createdJobAddress = new Address('BA', '123', 'country', 'city', 'street',)
+
+        Address createdJobAddress = Address.builder()
+                .state("State")
+                .postalCode("12345")
+                .country("Country")
+                .city("City")
+                .street("Street")
+                .build()
+
         CreateJobDTO createJobDTO = new CreateJobDTO('name', 'description', 2, createdJobAddress, competencies)
 
         when:
@@ -42,9 +56,27 @@ class JobControllerTest extends Specification {
     def "HandleGetAllByCompanyId"() {
         given:
         int idCompany = 2
-        Job createdJob1 = new Job(0, 'name', 'description', 3, 2)
-        Job createdJob2 = new Job(1, 'name', 'different description', 3, 2)
-        Job createdJob3 = new Job(2, 'name', 'description', 3, 2)
+        Job createdJob1 = Job.builder()
+                .id(0)
+                .name("name")
+                .description("description")
+                .idAddress(3)
+                .idCompany(2)
+                .build()
+        Job createdJob2 = Job.builder()
+                .id(1)
+                .name("name")
+                .description("different description")
+                .idAddress(3)
+                .idCompany(2)
+                .build()
+        Job createdJob3 = Job.builder()
+                .id(2)
+                .name("name")
+                .description("description")
+                .idAddress(3)
+                .idCompany(2)
+                .build()
 
         jobDAO.getAllByCompanyId(idCompany) >> [createdJob1, createdJob2, createdJob3]
 

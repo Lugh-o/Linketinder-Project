@@ -31,17 +31,21 @@ class CompanyController {
 
     Company handleCreateCompany(CreateCompanyDTO createCompanyDTO) {
 
-        Company company = new Company(createCompanyDTO.description,
-                createCompanyDTO.passwd,
-                createCompanyDTO.email,
-                createCompanyDTO.name,
-                createCompanyDTO.cnpj)
+        Company company = Company.builder()
+                .description(createCompanyDTO.description)
+                .passwd(createCompanyDTO.passwd)
+                .email(createCompanyDTO.email)
+                .name(createCompanyDTO.name)
+                .cnpj(createCompanyDTO.cnpj)
+                .build()
 
-        Address address = new Address(createCompanyDTO.address.state,
-                createCompanyDTO.address.postalCode,
-                createCompanyDTO.address.country,
-                createCompanyDTO.address.city,
-                createCompanyDTO.address.street)
+        Address address = Address.builder()
+                .state(createCompanyDTO.address.state)
+                .postalCode(createCompanyDTO.address.postalCode)
+                .country(createCompanyDTO.address.country)
+                .city(createCompanyDTO.address.city)
+                .street(createCompanyDTO.address.street)
+                .build()
 
         return companyDAO.create(company, address)
     }

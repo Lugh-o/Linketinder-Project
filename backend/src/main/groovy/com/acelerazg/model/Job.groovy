@@ -1,5 +1,6 @@
 package com.acelerazg.model
 
+import com.acelerazg.model.builder.JobBuilder
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
@@ -20,11 +21,7 @@ class Job {
         this.idCompany = idCompany
     }
 
-    // sem id
-    Job(String name, String description, int idCompany) {
-        this.name = name
-        this.description = description
-        this.idAddress = idAddress
-        this.idCompany = idCompany
+    static JobBuilder builder() {
+        return new JobBuilder()
     }
 }

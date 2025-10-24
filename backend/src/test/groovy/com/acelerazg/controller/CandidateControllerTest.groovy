@@ -30,10 +30,32 @@ class CandidateControllerTest extends Specification {
 
     def "HandleGetAll"() {
         given:
-        Candidate fake1 = new Candidate(1, "mail", "desc", 1, 1,
-                "First", "Last", "123", LocalDate.now(), "CS")
-        Candidate fake2 = new Candidate(1, "mail", "desc", 1, 1,
-                "First", "Last", "123", LocalDate.now(), "CS")
+        Candidate fake1 = Candidate.builder()
+                .idPerson(1)
+                .email("mail")
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(1)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
+
+        Candidate fake2 = Candidate.builder()
+                .idPerson(1)
+                .email("mail")
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(1)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
+
         candidateDAO.getAll() >> [fake1, fake2]
 
         when:
@@ -49,7 +71,7 @@ class CandidateControllerTest extends Specification {
         AnonymousCandidateDTO fakeDTO = new AnonymousCandidateDTO(1,
                 "CS",
                 "Description",
-                [new Competency("Java"), new Competency("Python")])
+                [Competency.builder().name("Java").build(), Competency.builder().name("Python").build()])
 
         candidateDAO.getAllCandidatesInterestedByJobId(42) >> [fakeDTO]
 
@@ -65,10 +87,29 @@ class CandidateControllerTest extends Specification {
     def "HandleCreateCandidate"() {
         given:
         String email = "test@mail.com"
-        List<Competency> competencies = [new Competency("Java"), new Competency("Python")]
+        List<Competency> competencies = [Competency.builder().name("Java").build(), Competency.builder().name("Python").build()]
 
-        Candidate createdCandidate = new Candidate(1, email, "desc", 1, 1, "First", "Last", "123", LocalDate.now(), "CS")
-        Address createdCandidateAddress = new Address("State", "12345", "Country", "City", "Street")
+        Candidate createdCandidate = Candidate.builder()
+                .idPerson(1)
+                .email(email)
+                .description("desc")
+                .idAddress(1)
+                .idCandidate(1)
+                .firstName("First")
+                .lastName("Last")
+                .cpf("123")
+                .birthday(LocalDate.now())
+                .graduation("CS")
+                .build()
+
+        Address createdCandidateAddress = Address.builder()
+                .state("State")
+                .postalCode("12345")
+                .country("Country")
+                .city("City")
+                .street("Street")
+                .build()
+
         CreateCandidateDTO createCandidateDTO = new CreateCandidateDTO("desc", "pass", email, "First", "Last", "123",
                 LocalDate.now(), "CS", createdCandidateAddress, competencies)
 

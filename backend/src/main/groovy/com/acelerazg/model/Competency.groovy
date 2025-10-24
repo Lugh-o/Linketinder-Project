@@ -1,5 +1,6 @@
 package com.acelerazg.model
 
+import com.acelerazg.model.builder.CompetencyBuilder
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
@@ -9,12 +10,12 @@ class Competency {
     int id
     String name
 
-    Competency(String name) {
+    Competency(int id, String name) {
+        this.id = id
         this.name = name
     }
 
-    Competency(String name, int id) {
-        this.name = name
-        this.id = id
+    static CompetencyBuilder builder() {
+        return new CompetencyBuilder()
     }
 }

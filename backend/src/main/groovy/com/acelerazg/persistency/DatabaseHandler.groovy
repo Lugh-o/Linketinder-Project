@@ -26,7 +26,7 @@ class DatabaseHandler {
     }
 
     static Connection getConnection() throws SQLException {
-        DriverManager.getConnection(URL, USER, PASSWORD)
+        return DriverManager.getConnection(URL, USER, PASSWORD)
     }
 
     static void closeQuietly(AutoCloseable... resources) {

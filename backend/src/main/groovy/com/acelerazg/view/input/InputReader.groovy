@@ -84,6 +84,14 @@ class InputReader {
         String city = readValidatedString("City:")
         String street = readValidatedString("Street:")
 
-        return new Address(state, postalCode, country, city, street)
+        Address address = Address.builder()
+                .state(state)
+                .postalCode(postalCode)
+                .country(country)
+                .city(city)
+                .street(street)
+                .build()
+
+        return address
     }
 }

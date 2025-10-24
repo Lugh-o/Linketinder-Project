@@ -27,20 +27,24 @@ class CandidateController {
 
         if (candidateDAO.getByEmail(createCandidateDTO.email)) return null
 
-        Candidate candidate = new Candidate(createCandidateDTO.description,
-                createCandidateDTO.passwd,
-                createCandidateDTO.email,
-                createCandidateDTO.firstName,
-                createCandidateDTO.lastName,
-                createCandidateDTO.cpf,
-                createCandidateDTO.birthday,
-                createCandidateDTO.graduation)
+        Candidate candidate = Candidate.builder()
+                .description(createCandidateDTO.description)
+                .passwd(createCandidateDTO.passwd)
+                .email(createCandidateDTO.email)
+                .firstName(createCandidateDTO.firstName)
+                .lastName(createCandidateDTO.lastName)
+                .cpf(createCandidateDTO.cpf)
+                .birthday(createCandidateDTO.birthday)
+                .graduation(createCandidateDTO.graduation)
+                .build()
 
-        Address address = new Address(createCandidateDTO.address.state,
-                createCandidateDTO.address.postalCode,
-                createCandidateDTO.address.country,
-                createCandidateDTO.address.city,
-                createCandidateDTO.address.street)
+        Address address = Address.builder()
+                .state(createCandidateDTO.address.state)
+                .postalCode(createCandidateDTO.address.postalCode)
+                .country(createCandidateDTO.address.country)
+                .city(createCandidateDTO.address.city)
+                .street(createCandidateDTO.address.street)
+                .build()
 
         candidate = candidateDAO.create(candidate, address, createCandidateDTO.competencies)
 
