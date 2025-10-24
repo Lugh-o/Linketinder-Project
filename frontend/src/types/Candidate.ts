@@ -8,7 +8,6 @@ export class Candidate extends Person {
 	competencies: Competency[];
 
 	constructor(
-		id: number,
 		name: string,
 		email: string,
 		state: string,
@@ -17,9 +16,10 @@ export class Candidate extends Person {
 		cpf: string,
 		age: number,
 		graduation: string,
-		competencies: Competency[]
+		competencies: Competency[],
+		id?: number
 	) {
-		super(id, name, email, state, cep, description);
+		super(id ?? 0, name, email, state, cep, description);
 		this.cpf = cpf;
 		this.age = age;
 		this.graduation = graduation;

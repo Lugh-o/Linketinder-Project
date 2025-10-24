@@ -1,6 +1,6 @@
 import styles from "./jobCard.module.css";
 
-import type { Job } from "../../types/Job";
+import { Job } from "../../types/Job";
 import { competencyBubble } from "../competencyBubble/competencyBubble";
 
 export function createCommonElements(job: Job): {

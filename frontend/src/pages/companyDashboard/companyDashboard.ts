@@ -3,15 +3,18 @@ import styles from "./companyDashboard.module.css";
 import { Chart } from "chart.js/auto";
 
 import { candidateCard } from "../../components/candidateCard/candidateCard";
-import { store } from "../../Store";
 import type { Company } from "../../types/Company";
 import { COMPETENCIES, type Competency } from "../../types/Competency";
 import { companyHeader } from "../../components/header/companyHeader";
+import type { AppContext } from "../../utils/AppContext";
 
-export function companyDashboard(company: Company): HTMLDivElement {
+export function companyDashboard(
+	company: Company,
+	appContext: AppContext
+): HTMLDivElement {
 	const container: HTMLDivElement = document.createElement("div");
 	container.className = styles.companyDashboardContainer;
-	const headerElement: HTMLElement = companyHeader(company);
+	const headerElement: HTMLElement = companyHeader(company, appContext);
 	container.appendChild(headerElement);
 
 	let data: Record<Competency, number> = {};
@@ -26,7 +29,7 @@ export function companyDashboard(company: Company): HTMLDivElement {
 		document.createElement("div");
 	candidateListContainer.className = styles.candidateListContainer;
 
-	store.getCandidateList().forEach((candidate) => {
+	appContext.store.getCandidateList().forEach((candidate) => {
 		const card: HTMLDivElement = candidateCard(candidate);
 		candidateListContainer.appendChild(card);
 		candidate.competencies.forEach((comp) => {

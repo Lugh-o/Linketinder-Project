@@ -1,35 +1,38 @@
 import styles from "./header.module.css";
 
 import { Company } from "../../types/Company";
-import { registrationScreen } from "../../pages/registrationScreen/registrationScreen";
-import { navigateTo } from "../../utils/router";
-import { jobListDashboard } from "../../pages/jobListDashboard/jobListDashboard";
-import { companyDashboard } from "../../pages/companyDashboard/companyDashboard";
 import { buildHeader } from "./headerHelper";
 import { createHeaderButton, buildCommonAppName } from "./headerHelper";
+import type { AppContext } from "../../utils/AppContext";
 
-export function companyHeader(company: Company): HTMLElement {
-	return buildHeader(company, buildAppName);
+export function companyHeader(
+	company: Company,
+	appContext: AppContext
+): HTMLElement {
+	return buildHeader(company, () => buildAppName(appContext, company));
 }
 
-function buildAppName(company: Company): HTMLHeadingElement {
+function buildAppName(
+	appContext: AppContext,
+	company: Company
+): HTMLHeadingElement {
 	const appName = buildCommonAppName();
 
-	const logoutButton = createHeaderButton("Logout", styles.logoutButton, () =>
-		navigateTo(registrationScreen())
+	appName.appendChild(
+		createHeaderButton("Ver Candidatos", styles.jobsButton, () =>
+			appContext.router.goToCompanyDashboard(company, appContext)
+		)
 	);
-	const candidatesButton = createHeaderButton(
-		"Ver Candidatos",
-		styles.jobsButton,
-		() => navigateTo(companyDashboard(company))
+	appName.appendChild(
+		createHeaderButton("Ver Vagas", styles.jobsButton, () =>
+			appContext.router.goToJobList(company, appContext)
+		)
 	);
-	const jobsButton = createHeaderButton("Ver Vagas", styles.jobsButton, () =>
-		navigateTo(jobListDashboard(company))
+	appName.appendChild(
+		createHeaderButton("Logout", styles.logoutButton, () =>
+			appContext.router.goToRegistration(appContext)
+		)
 	);
-
-	appName.appendChild(candidatesButton);
-	appName.appendChild(jobsButton);
-	appName.appendChild(logoutButton);
 
 	return appName;
 }

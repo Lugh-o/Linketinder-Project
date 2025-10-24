@@ -2,12 +2,13 @@ import styles from "./registrationScreen.module.css";
 
 import { registrationForm } from "../../components/registrationForm/registrationForm";
 import { loginForm } from "../../components/loginForm/loginForm";
+import type { AppContext } from "../../utils/AppContext";
 
-export function registrationScreen(): HTMLDivElement {
+export function registrationScreen(appContext: AppContext): HTMLDivElement {
 	const container = createScreenContainer();
 	const header = createHeader();
-	const registration = registrationForm();
-	const login = loginForm();
+	const registration = registrationForm(appContext);
+	const login = loginForm(appContext);
 
 	header.appendChild(login);
 	container.appendChild(header);

@@ -1,10 +1,8 @@
 import { Company } from "../../types/Company";
-import { store } from "../../Store";
 import { type FieldConfig, createLabeledInput } from "./formHelpers";
-import { navigateTo } from "../../utils/router";
-import { companyDashboard } from "../../pages/companyDashboard/companyDashboard";
+import { AppContext } from "../../utils/AppContext";
 
-export function registrationFormCompany(): HTMLElement {
+export function registrationFormCompany(appContext: AppContext): HTMLElement {
 	const form: HTMLFormElement = document.createElement("form");
 
 	const fields: FieldConfig[] = [
@@ -71,7 +69,6 @@ export function registrationFormCompany(): HTMLElement {
 		}
 
 		const company: Company = new Company(
-			store.getNextCompanyId(),
 			inputMap["name"].value,
 			inputMap["email"].value,
 			inputMap["state"].value,
@@ -80,8 +77,8 @@ export function registrationFormCompany(): HTMLElement {
 			inputMap["cnpj"].value,
 			inputMap["country"].value
 		);
-		store.addCompany(company);
-		navigateTo(companyDashboard(company));
+		appContext.store.addCompany(company);
+		appContext.router.goToCompanyDashboard(company, appContext);
 	});
 
 	return form;

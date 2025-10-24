@@ -4,17 +4,6 @@
 	margin-top: 20px;
 }
 
-.jobListContainer {
-	max-width: 90vw;
-	margin: 20px auto;
-	display: grid;
-	gap: 50px;
-	grid-template-columns: repeat(auto-fit, minmax(325px, 1fr));
-	justify-items: center;
-	overflow-y: auto;
-	height: 85dvh;
-}
-
 .createNewJobButton {
 	display: flex;
 	align-content: center;
@@ -32,12 +21,15 @@
 	box-shadow: none;
 }
 
-.createNewJobButton span {
-	display: flex;
-	align-content: center;
-	justify-content: center;
-	margin-top: 2px;
-	font-size: 16px;
+.jobListContainer {
+	max-width: 90vw;
+	margin: 20px auto;
+	display: grid;
+	gap: 50px;
+	grid-template-columns: repeat(auto-fit, minmax(325px, 1fr));
+	justify-items: center;
+	overflow-y: auto;
+	height: 85dvh;
 }
 
 .createJobModalOverlay {
@@ -58,6 +50,44 @@
 	padding: 20px;
 	border-radius: 15px;
 	min-width: 370px;
+	max-width: 90vw;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.createJobTitle {
+	text-align: center;
+	font-size: 32px;
+	margin-bottom: 16px;
+	font-weight: 600;
+}
+
+.createJobForm {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.formField {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.jobNameInput,
+.jobDescriptionInput {
+	padding: 8px 12px;
+	border-radius: 6px;
+	border: 1px solid var(--neutral-dark);
+	font-size: 14px;
+	outline: none;
+}
+
+.jobDescriptionInput {
+	resize: vertical;
+	min-height: 80px;
 }
 
 .competencyListWrapper {
@@ -65,17 +95,58 @@
 	flex-direction: column;
 	flex-wrap: wrap;
 	height: 130px;
-	align-content: flex-start;
 	gap: 5px;
-}
-
-.createJobTitle {
-	text-align: center;
-	margin-bottom: 20px;
-	font-size: 32px;
 }
 
 .competencyCheck {
 	display: flex;
+	align-items: center;
 	gap: 5px;
+	font-size: 14px;
+}
+
+.modalButtonWrapper {
+	display: flex;
+	justify-content: center;
+	gap: 30px;
+	margin-top: 8px;
+}
+
+.modalButtonWrapper button {
+	padding: 8px 16px;
+	border-radius: 6px;
+	border: none;
+	cursor: pointer;
+	font-weight: 500;
+	transition: background-color 0.2s ease;
+}
+
+.modalButtonWrapper button[type="submit"] {
+	color: white;
+	padding: 0.5rem 1rem;
+	border-radius: 6px;
+	cursor: pointer;
+	color: var(--neutral-dark);
+	background-color: var(--neutral-light);
+	border: none;
+	box-shadow: 0px 2px 0px #0000004f;
+}
+
+.modalButtonWrapper button[type="submit"]:hover {
+	color: var(--neutral-dark);
+	background-color: var(--neutral-light);
+	box-shadow: 0px 2px 0px #007bff;
+	transition-property: "box-shadow";
+	transition-duration: 1s;
+}
+
+.modalButtonWrapper button[type="button"] {
+	background-color: var(--neutral-medium);
+	color: var(--background-light);
+}
+
+.modalButtonWrapper button[type="button"]:hover {
+	background-color: #4e555a;
+	box-shadow: none;
+	border: none;
 }

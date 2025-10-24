@@ -7,23 +7,23 @@ export class Company extends Person {
 	private jobList: Job[];
 
 	constructor(
-		id: number,
 		name: string,
 		email: string,
 		state: string,
 		cep: string,
 		description: string,
 		cnpj: string,
-		country: string
+		country: string,
+		id?: number
 	) {
-		super(id, name, email, state, cep, description);
+		super(id ?? 0, name, email, state, cep, description);
 		this.cnpj = cnpj;
 		this.country = country;
 		this.jobList = [];
 	}
 
 	getJobList(): Job[] {
-		return this.jobList;
+		return [...this.jobList];
 	}
 
 	addJob(job: Job): boolean {

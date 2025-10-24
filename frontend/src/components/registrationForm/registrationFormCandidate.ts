@@ -3,11 +3,9 @@ import styles from "./registrationForm.module.css";
 import { Candidate } from "../../types/Candidate";
 import { COMPETENCIES, type Competency } from "../../types/Competency";
 import { type FieldConfig, createLabeledInput } from "./formHelpers";
-import { navigateTo } from "../../utils/router";
-import { candidateDashboard } from "../../pages/candidateDashboard/candidateDashboard";
-import { store } from "../../Store";
+import type { AppContext } from "../../utils/AppContext";
 
-export function registrationFormCandidate(): HTMLElement {
+export function registrationFormCandidate(appContext: AppContext): HTMLElement {
 	const form: HTMLFormElement = document.createElement("form");
 
 	const fields: FieldConfig[] = [
@@ -113,7 +111,6 @@ export function registrationFormCandidate(): HTMLElement {
 		}
 
 		const candidate: Candidate = new Candidate(
-			store.getNextCandidateId(),
 			inputMap["name"].value,
 			inputMap["email"].value,
 			inputMap["state"].value,
@@ -125,8 +122,8 @@ export function registrationFormCandidate(): HTMLElement {
 			selectedCompetencies
 		);
 
-		store.addCandidate(candidate);
-		navigateTo(candidateDashboard(candidate));
+		appContext.store.addCandidate(candidate);
+		appContext.router.goToCandidateDashboard(candidate, appContext);
 	});
 	return form;
 }

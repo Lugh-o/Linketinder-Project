@@ -10,14 +10,14 @@ Uma aplicação que mescla as funcionalidades do Linkedin e do Tinder, para Cand
 
 ## Tecnologias utilizadas
 
-- Groovy 4.0.6
-- Spock 2.4
-- JDBC
-- PostgreSQL
-- Gradle 6.9.4
-- Typescript
-- Vite
-- HTML/CSS
+-   Groovy 4.0.6
+-   Spock 2.4
+-   JDBC
+-   PostgreSQL
+-   Gradle 6.9.4
+-   Typescript
+-   Vite
+-   HTML/CSS
 
 ## Backend
 
@@ -25,7 +25,7 @@ Uma aplicação que mescla as funcionalidades do Linkedin e do Tinder, para Cand
 
 -   JVM 8+
 -   Groovy 4.0.6+
--   PostgreSQL 
+-   PostgreSQL
 
 ### Como executar
 
@@ -89,6 +89,12 @@ Para instalar as dependências:
 
 ```
 npm install
+```
+
+Para transpilar:
+
+```
+npm run build
 ```
 
 Para executar:

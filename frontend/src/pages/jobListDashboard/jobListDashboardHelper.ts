@@ -4,12 +4,13 @@ import { companyJobCard } from "../../components/jobCard/companyJobCard";
 import type { Company } from "../../types/Company";
 import addIcon from "../../assets/add.svg";
 import { COMPETENCIES, type Competency } from "../../types/Competency";
-import { store } from "../../Store";
 import { Job } from "../../types/Job";
-import { navigateTo } from "../../utils/router";
-import { jobListDashboard } from "./jobListDashboard";
+import type { AppContext } from "../../utils/AppContext";
 
-export function createNewJobButton(company: Company): HTMLDivElement {
+export function createNewJobButton(
+	company: Company,
+	appContext: AppContext
+): HTMLDivElement {
 	const wrapper = document.createElement("div");
 	wrapper.className = styles.newJobButtonWrapper;
 
@@ -18,31 +19,42 @@ export function createNewJobButton(company: Company): HTMLDivElement {
 
 	const icon = document.createElement("img");
 	icon.src = addIcon;
-	icon.alt = "Adicionar nova vaga";
 
 	const text = document.createElement("span");
-	text.textContent = "Criar vaga de emprego";
+	text.textContent = "Adicionar nova vaga";
 
 	button.append(icon, text);
-	button.addEventListener("click", () => openCreateJobModal(company));
+	button.addEventListener("click", () =>
+		openCreateJobModal(company, appContext)
+	);
 
 	wrapper.appendChild(button);
 	return wrapper;
 }
 
-export function renderJobList(company: Company): HTMLDivElement {
-	const jobListContainer = document.createElement("div");
-	jobListContainer.className = styles.jobListContainer;
+export function renderJobList(
+	company: Company,
+	appContext: AppContext
+): HTMLDivElement {
+	const container = document.createElement("div");
+	container.className = styles.jobListContainer;
 
-	company.getJobList().forEach((job) => {
-		const jobCardElement = companyJobCard(job, company);
-		jobListContainer.appendChild(jobCardElement);
+	company.getJobList().forEach((job: Job) => {
+		const jobCard = companyJobCard(job, () => {
+			const index = company.getJobList().indexOf(job);
+			appContext.store.removeJobByIndexFromCompany(company, index);
+			appContext.router.goToJobList(company, appContext);
+		});
+		container.appendChild(jobCard);
 	});
 
-	return jobListContainer;
+	return container;
 }
 
-export function openCreateJobModal(company: Company): void {
+export function openCreateJobModal(
+	company: Company,
+	appContext: AppContext
+): void {
 	const overlay = document.createElement("div");
 	overlay.className = styles.createJobModalOverlay;
 
@@ -50,10 +62,10 @@ export function openCreateJobModal(company: Company): void {
 	modal.className = styles.createJobModal;
 
 	const title = document.createElement("h2");
-	title.textContent = "Criar vaga";
 	title.className = styles.createJobTitle;
+	title.textContent = "Criar vaga";
 
-	const form = buildJobCreationForm(company, overlay);
+	const form = buildJobCreationForm(company, overlay, appContext);
 
 	modal.append(title, form);
 	overlay.appendChild(modal);
@@ -62,19 +74,26 @@ export function openCreateJobModal(company: Company): void {
 
 export function buildJobCreationForm(
 	company: Company,
-	overlay: HTMLDivElement
+	overlay: HTMLDivElement,
+	appContext: AppContext
 ): HTMLFormElement {
 	const form = document.createElement("form");
+	form.className = styles.createJobForm;
 
 	form.append(
-		createLabeledInput("Nome da vaga:", "text", styles.jobNameInput, true),
+		createLabeledInput(
+			"Nome da vaga:",
+			"text",
+			styles.jobNameInput,
+			"jobNameInput"
+		),
 		createLabeledTextarea(
 			"Descrição da vaga:",
 			styles.jobDescriptionInput,
-			true
+			"jobDescriptionInput"
 		),
 		createCompetencySelector(),
-		createFormButtons(company, overlay, form)
+		createFormButtons(company, overlay, form, appContext)
 	);
 
 	return form;
@@ -84,17 +103,20 @@ export function createLabeledInput(
 	labelText: string,
 	type: string,
 	className: string,
-	required = false
+	inputId: string
 ): HTMLElement {
 	const wrapper = document.createElement("div");
+	wrapper.className = styles.formField;
 
 	const label = document.createElement("label");
+	label.htmlFor = inputId;
 	label.textContent = labelText;
 
 	const input = document.createElement("input");
 	input.type = type;
+	input.id = inputId;
 	input.className = className;
-	input.required = required;
+	input.required = true;
 
 	wrapper.append(label, input);
 	return wrapper;
@@ -103,30 +125,34 @@ export function createLabeledInput(
 export function createLabeledTextarea(
 	labelText: string,
 	className: string,
-	required = false
+	textareaId: string
 ): HTMLElement {
 	const wrapper = document.createElement("div");
+	wrapper.className = styles.formField;
 
 	const label = document.createElement("label");
+	label.htmlFor = textareaId;
 	label.textContent = labelText;
 
 	const textarea = document.createElement("textarea");
+	textarea.id = textareaId;
 	textarea.className = className;
-	textarea.required = required;
+	textarea.required = true;
 
 	wrapper.append(label, textarea);
 	return wrapper;
 }
 
 export function createCompetencySelector(): HTMLElement {
-	const section = document.createElement("div");
+	const wrapper = document.createElement("div");
+	wrapper.className = styles.formField;
 
 	const label = document.createElement("label");
 	label.textContent = "Competências:";
-	section.appendChild(label);
+	wrapper.appendChild(label);
 
-	const wrapper = document.createElement("div");
-	wrapper.className = styles.competencyListWrapper;
+	const listWrapper = document.createElement("div");
+	listWrapper.className = styles.competencyListWrapper;
 
 	COMPETENCIES.forEach((comp) => {
 		const option = document.createElement("label");
@@ -137,18 +163,22 @@ export function createCompetencySelector(): HTMLElement {
 		checkbox.name = "competencies";
 		checkbox.value = comp;
 
-		option.append(checkbox, document.createTextNode(comp));
-		wrapper.appendChild(option);
+		option.append(
+			checkbox,
+			document.createTextNode(comp.replace("_", " "))
+		);
+		listWrapper.appendChild(option);
 	});
 
-	section.appendChild(wrapper);
-	return section;
+	wrapper.appendChild(listWrapper);
+	return wrapper;
 }
 
 export function createFormButtons(
 	company: Company,
 	overlay: HTMLDivElement,
-	form: HTMLFormElement
+	form: HTMLFormElement,
+	appContext: AppContext
 ): HTMLElement {
 	const wrapper = document.createElement("div");
 	wrapper.className = styles.modalButtonWrapper;
@@ -163,7 +193,7 @@ export function createFormButtons(
 	cancelBtn.addEventListener("click", () => overlay.remove());
 
 	form.addEventListener("submit", (e) =>
-		handleJobFormSubmit(e, company, form, overlay)
+		handleJobFormSubmit(e, company, form, overlay, appContext)
 	);
 
 	wrapper.append(submitBtn, cancelBtn);
@@ -174,14 +204,15 @@ export function handleJobFormSubmit(
 	e: Event,
 	company: Company,
 	form: HTMLFormElement,
-	overlay: HTMLDivElement
+	overlay: HTMLDivElement,
+	appContext: AppContext
 ): void {
 	e.preventDefault();
 
-	const nameInput =
-		form.querySelector<HTMLInputElement>("input[type='text']");
-	const descriptionInput =
-		form.querySelector<HTMLTextAreaElement>("textarea");
+	const nameInput = form.querySelector<HTMLInputElement>("#jobNameInput");
+	const descriptionInput = form.querySelector<HTMLTextAreaElement>(
+		"#jobDescriptionInput"
+	);
 	const selectedCompetencies = Array.from(
 		form.querySelectorAll<HTMLInputElement>(
 			"input[name='competencies']:checked"
@@ -199,14 +230,13 @@ export function handleJobFormSubmit(
 	}
 
 	const newJob = new Job(
-		store.getNextJobId(),
 		nameInput.value.trim(),
 		descriptionInput.value.trim(),
 		selectedCompetencies
 	);
 
-	company.addJob(newJob);
-	store.save();
+	appContext.store.addJobToCompany(company, newJob);
 	overlay.remove();
-	navigateTo(jobListDashboard(company));
+
+	appContext.router.goToCompanyDashboard(company, appContext);
 }

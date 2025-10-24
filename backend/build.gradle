@@ -25,12 +25,12 @@ test {
 
 tasks.register('migrate', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'com.acelerazg.persistence.Migrate'
+    mainClass = 'com.acelerazg.persistency.Migrate'
 }
 
 tasks.register('seed', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'com.acelerazg.persistence.Seed'
+    mainClass = 'com.acelerazg.persistency.Seed'
 }
 
 tasks.register('run', JavaExec) {

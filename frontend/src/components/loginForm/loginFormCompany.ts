@@ -1,13 +1,12 @@
-import { store } from "../../Store";
-import { companyDashboard } from "../../pages/companyDashboard/companyDashboard";
 import { Company } from "../../types/Company";
-import { navigateTo } from "../../utils/router";
 import { generateCommonLoginForm } from "./loginFormHelper";
+import type { AppContext } from "../../utils/AppContext";
 
-export function loginFormCompany(): HTMLElement {
+export function loginFormCompany(appContext: AppContext): HTMLElement {
 	return generateCommonLoginForm(
 		"Entrar como empresa",
-		() => store.getCompanyList(),
-		(company: Company) => navigateTo(companyDashboard(company))
+		() => appContext.store.getCompanyList(),
+		(company: Company) =>
+			appContext.router.goToCompanyDashboard(company, appContext)
 	);
 }

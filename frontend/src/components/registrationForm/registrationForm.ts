@@ -2,8 +2,9 @@ import { registrationFormCompany } from "./registrationFormCompany";
 import { registrationFormCandidate } from "./registrationFormCandidate";
 import styles from "./registrationForm.module.css";
 import switchControls from "../switchControls/switchControls";
+import type { AppContext } from "../../utils/AppContext";
 
-export function registrationForm(): HTMLElement {
+export function registrationForm(appContext: AppContext): HTMLElement {
 	const container: HTMLElement = document.createElement("main");
 	container.className = styles.formContainer;
 
@@ -12,17 +13,17 @@ export function registrationForm(): HTMLElement {
 
 	function showCandidateForm(): void {
 		formArea.innerHTML = "";
-		formArea.appendChild(registrationFormCandidate());
+		formArea.appendChild(registrationFormCandidate(appContext));
 	}
 
 	function showCompanyForm(): void {
 		formArea.innerHTML = "";
-		formArea.appendChild(registrationFormCompany());
+		formArea.appendChild(registrationFormCompany(appContext));
 	}
 
 	const switchRegistrationControls = switchControls(
-		showCandidateForm,
-		showCompanyForm
+		() => showCandidateForm(),
+		() => showCompanyForm()
 	);
 
 	container.appendChild(switchRegistrationControls);
