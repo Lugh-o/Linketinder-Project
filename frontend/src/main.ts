@@ -11,7 +11,7 @@ const appContainer: HTMLBodyElement | null = document.querySelector("body");
 const idGenerator: IdGenerator = new IdGenerator();
 const localStorage: LocalStorage = new LocalStorage();
 const router: Router = new Router();
-const store: Store = new Store(localStorage, idGenerator);
+const store = Store.getInstance(localStorage, idGenerator);
 const appContext: AppContext = new AppContext(store, router);
 
 if (appContainer) {

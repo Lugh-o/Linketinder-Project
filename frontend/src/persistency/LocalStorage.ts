@@ -1,6 +1,4 @@
 export class LocalStorage {
-	constructor() {}
-
 	save(data: object): void {
 		localStorage.setItem("store", JSON.stringify(data));
 	}

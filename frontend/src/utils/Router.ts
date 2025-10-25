@@ -2,7 +2,6 @@ import { candidateDashboard } from "../pages/candidateDashboard/candidateDashboa
 import { companyDashboard } from "../pages/companyDashboard/companyDashboard";
 import { jobListDashboard } from "../pages/jobListDashboard/jobListDashboard";
 import { registrationScreen } from "../pages/registrationScreen/registrationScreen";
-import type { Store } from "../persistency/Store";
 import type { Candidate } from "../types/Candidate";
 import type { Company } from "../types/Company";
 import type { AppContext } from "./AppContext";

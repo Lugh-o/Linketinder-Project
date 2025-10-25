@@ -5,17 +5,38 @@ import { LocalStorage } from "./LocalStorage";
 import { IdGenerator } from "./IdGenerator";
 
 export class Store {
+	private static instance: Store | null = null;
+
 	private candidateList: Candidate[];
 	private companyList: Company[];
 	private localStorage: LocalStorage;
 	private idGenerator: IdGenerator;
 
-	constructor(localStorage: LocalStorage, idGenerator: IdGenerator) {
+	private constructor(localStorage: LocalStorage, idGenerator: IdGenerator) {
 		this.localStorage = localStorage;
 		this.idGenerator = idGenerator;
 		this.candidateList = [];
 		this.companyList = [];
 		this.load();
+	}
+
+	static getInstance(
+		localStorage?: LocalStorage,
+		idGenerator?: IdGenerator
+	): Store {
+		if (!Store.instance) {
+			if (!localStorage || !idGenerator) {
+				throw new Error(
+					"Store not initialized. Provide LocalStorage and IdGenerator."
+				);
+			}
+			Store.instance = new Store(localStorage, idGenerator);
+		}
+		return Store.instance;
+	}
+
+	static clearInstance(): void {
+		Store.instance = null;
 	}
 
 	save(): void {
