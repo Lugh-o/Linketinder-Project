@@ -7,19 +7,22 @@ import com.acelerazg.dto.CreateJobDTO
 import com.acelerazg.model.Address
 import com.acelerazg.model.Competency
 import com.acelerazg.model.Job
+import com.acelerazg.service.JobService
 import spock.lang.Specification
 
 class JobControllerTest extends Specification {
     AddressDAO addressDAO
     CompetencyDAO competencyDAO
     JobDAO jobDAO
+    JobService jobService
     JobController controller
 
     def setup() {
         addressDAO = Mock()
         competencyDAO = Mock()
         jobDAO = Mock(JobDAO, constructorArgs: [addressDAO, competencyDAO])
-        controller = new JobController(jobDAO)
+        jobService = Mock(JobService, constructorArgs: [jobDAO])
+        controller = new JobController(jobService)
     }
 
     def "HandleCreateJob"() {
@@ -32,7 +35,7 @@ class JobControllerTest extends Specification {
                 .idCompany(2)
                 .build()
         List<Competency> competencies = [Competency.builder().name("Java").build(), Competency.builder().name("Python").build()]
-        jobDAO.create(*_) >> createdJob
+        jobService.createJob(*_) >> createdJob
 
         Address createdJobAddress = Address.builder()
                 .state("State")
@@ -78,7 +81,7 @@ class JobControllerTest extends Specification {
                 .idCompany(2)
                 .build()
 
-        jobDAO.getAllByCompanyId(idCompany) >> [createdJob1, createdJob2, createdJob3]
+        jobService.getAllByCompanyId(idCompany) >> [createdJob1, createdJob2, createdJob3]
 
         when:
         List<Job> result = controller.handleGetAllByCompanyId(idCompany)

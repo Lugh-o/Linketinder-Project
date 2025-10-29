@@ -1,16 +1,16 @@
 package com.acelerazg.controller
 
-import com.acelerazg.dao.MatchEventDAO
 import com.acelerazg.dto.MatchDTO
+import com.acelerazg.service.MatchService
 
 class MatchController {
-    private final MatchEventDAO matchEventDAO
+    private final MatchService matchService
 
-    MatchController(MatchEventDAO matchEventDAO) {
-        this.matchEventDAO = matchEventDAO
+    MatchController(MatchService matchService) {
+        this.matchService = matchService
     }
 
     List<MatchDTO> handleGetAllMatchesByJobId(int idJob) {
-        return matchEventDAO.getAllMatchesByJobId(idJob)
+        return matchService.getAllMatchesByJobId(idJob)
     }
 }

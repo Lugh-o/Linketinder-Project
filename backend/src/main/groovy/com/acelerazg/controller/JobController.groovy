@@ -1,39 +1,23 @@
 package com.acelerazg.controller
 
-import com.acelerazg.dao.JobDAO
 import com.acelerazg.dto.CreateJobDTO
-import com.acelerazg.model.Address
 import com.acelerazg.model.Job
+import com.acelerazg.service.JobService
 import groovy.transform.CompileStatic
 
 @CompileStatic
 class JobController {
-    private final JobDAO jobDAO
+    private final JobService jobService
 
-    JobController(JobDAO jobDAO) {
-        this.jobDAO = jobDAO
+    JobController(JobService jobService) {
+        this.jobService = jobService
     }
 
     Job handleCreateJob(CreateJobDTO createJobDTO) {
-
-        Job job = Job.builder()
-                .name(createJobDTO.name)
-                .description(createJobDTO.description)
-                .idCompany(createJobDTO.idCompany)
-                .build()
-
-        Address address = Address.builder()
-                .state(createJobDTO.address.state)
-                .postalCode(createJobDTO.address.postalCode)
-                .country(createJobDTO.address.country)
-                .city(createJobDTO.address.city)
-                .street(createJobDTO.address.street)
-                .build()
-
-        return jobDAO.create(job, address, createJobDTO.competencies)
+        return jobService.createJob(createJobDTO)
     }
 
     List<Job> handleGetAllByCompanyId(int id) {
-        return jobDAO.getAllByCompanyId(id)
+        return jobService.getAllByCompanyId(id)
     }
 }

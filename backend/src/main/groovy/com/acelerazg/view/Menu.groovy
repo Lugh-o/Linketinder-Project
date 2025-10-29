@@ -11,6 +11,10 @@ import com.acelerazg.dto.CreateJobDTO
 import com.acelerazg.dto.MatchDTO
 import com.acelerazg.exceptions.EmptyCollectionException
 import com.acelerazg.model.*
+import com.acelerazg.service.CandidateService
+import com.acelerazg.service.CompanyService
+import com.acelerazg.service.JobService
+import com.acelerazg.service.MatchService
 import com.acelerazg.view.input.InputReader
 import com.acelerazg.view.input.InputValidator
 import groovy.transform.CompileStatic
@@ -36,10 +40,15 @@ class Menu {
         MatchEventDAO matchEventDAO = new MatchEventDAO()
         JobDAO jobDAO = new JobDAO(addressDao, competencyDao)
 
-        candidateController = new CandidateController(candidateDao)
-        companyController = new CompanyController(companyDao, candidateDao, matchEventDAO, jobDAO)
-        jobController = new JobController(jobDAO)
-        matchController = new MatchController(matchEventDAO)
+        CandidateService candidateService = new CandidateService(candidateDao)
+        candidateController = new CandidateController(candidateService)
+        CompanyService companyService = new CompanyService(companyDao, candidateDao, matchEventDAO, jobDAO)
+        companyController = new CompanyController(companyService)
+        JobService jobService = new JobService(jobDAO)
+        jobController = new JobController(jobService)
+        MatchService matchService = new MatchService(matchEventDAO)
+        matchController = new MatchController(matchService)
+
         appScanner = new Scanner(System.in)
         inputValidator = new InputValidator()
         inputReader = new InputReader(competencyDao, appScanner, inputValidator)
@@ -78,7 +87,7 @@ class Menu {
     }
 
     private final Map<String, Runnable> commands = ["1": { candidateController.handleGetAll().forEach { Candidate c -> println c } },
-                                                    "2": { companyController.handleGetAll().forEach { Company co -> println co } },
+                                                    "2": { companyController.handleGetAllCompanies().forEach { Company co -> println co } },
                                                     "3": this.&createCandidateCase,
                                                     "4": this.&createCompanyCase,
                                                     "5": this.&createJobCase,
@@ -139,7 +148,7 @@ class Menu {
         int idCompany
 
         try {
-            idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+            idCompany = selectEntityFromCollection(companyController.handleGetAllCompanies(), "Company", "idCompany")
         } catch (EmptyCollectionException e) {
             println e.message
             return
@@ -168,7 +177,7 @@ class Menu {
 
         try {
             idCandidate = selectEntityFromCollection(candidateController.handleGetAll(), "Candidate", "idCandidate")
-            idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+            idCompany = selectEntityFromCollection(companyController.handleGetAllCompanies(), "Company", "idCompany")
             idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
         } catch (EmptyCollectionException e) {
             println e.message
@@ -188,7 +197,7 @@ class Menu {
         int idJob
 
         try {
-            idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+            idCompany = selectEntityFromCollection(companyController.handleGetAllCompanies(), "Company", "idCompany")
             idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
             idCandidate = selectEntityFromCollection(candidateController.handleGetAllInterestedInJob(idJob), "Candidate")
         } catch (EmptyCollectionException e) {
@@ -215,7 +224,7 @@ class Menu {
         int idJob
 
         try {
-            idCompany = selectEntityFromCollection(companyController.handleGetAll(), "Company", "idCompany")
+            idCompany = selectEntityFromCollection(companyController.handleGetAllCompanies(), "Company", "idCompany")
             idJob = selectEntityFromCollection(jobController.handleGetAllByCompanyId(idCompany), "Job")
         } catch (EmptyCollectionException e) {
             println e.message

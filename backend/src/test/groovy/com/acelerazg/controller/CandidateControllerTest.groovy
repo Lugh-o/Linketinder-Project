@@ -9,6 +9,7 @@ import com.acelerazg.dto.CreateCandidateDTO
 import com.acelerazg.model.Address
 import com.acelerazg.model.Candidate
 import com.acelerazg.model.Competency
+import com.acelerazg.service.CandidateService
 import spock.lang.Specification
 
 import java.time.LocalDate
@@ -17,6 +18,7 @@ class CandidateControllerTest extends Specification {
     AddressDAO addressDAO
     PersonDAO personDAO
     CompetencyDAO competencyDAO
+    CandidateService candidateService
     CandidateDAO candidateDAO
     CandidateController controller
 
@@ -25,7 +27,8 @@ class CandidateControllerTest extends Specification {
         personDAO = Mock()
         competencyDAO = Mock()
         candidateDAO = Mock(CandidateDAO, constructorArgs: [addressDAO, personDAO, competencyDAO])
-        controller = new CandidateController(candidateDAO)
+        candidateService = Mock(CandidateService, constructorArgs: [candidateDAO])
+        controller = new CandidateController(candidateService)
     }
 
     def "HandleGetAll"() {
@@ -56,7 +59,7 @@ class CandidateControllerTest extends Specification {
                 .graduation("CS")
                 .build()
 
-        candidateDAO.getAll() >> [fake1, fake2]
+        candidateService.getAllCandidates() >> [fake1, fake2]
 
         when:
         List<Candidate> candidateList = controller.handleGetAll()
@@ -73,7 +76,7 @@ class CandidateControllerTest extends Specification {
                 "Description",
                 [Competency.builder().name("Java").build(), Competency.builder().name("Python").build()])
 
-        candidateDAO.getAllCandidatesInterestedByJobId(42) >> [fakeDTO]
+        candidateService.getAllInterestedInJob(42) >> [fakeDTO]
 
         when:
         List<AnonymousCandidateDTO> result = controller.handleGetAllInterestedInJob(42)
@@ -114,8 +117,7 @@ class CandidateControllerTest extends Specification {
                 LocalDate.now(), "CS", createdCandidateAddress, competencies)
 
 
-        candidateDAO.getByEmail(email) >> null
-        candidateDAO.create(*_) >> createdCandidate
+        candidateService.createCandidate(*_) >> createdCandidate
 
         when:
         Candidate result = controller.handleCreateCandidate(createCandidateDTO)
@@ -135,6 +137,6 @@ class CandidateControllerTest extends Specification {
         controller.handleLikeJob(idCandidate, idJob)
 
         then:
-        1 * candidateDAO.likeJob(idCandidate, idJob)
+        1 * candidateService.likeJob(idCandidate, idJob)
     }
 }

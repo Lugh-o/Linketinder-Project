@@ -4,6 +4,8 @@ import com.acelerazg.dao.*
 import com.acelerazg.dto.CreateCompanyDTO
 import com.acelerazg.model.Address
 import com.acelerazg.model.Company
+import com.acelerazg.model.LikeResult
+import com.acelerazg.service.CompanyService
 import spock.lang.Specification
 
 class CompanyControllerTest extends Specification {
@@ -14,6 +16,7 @@ class CompanyControllerTest extends Specification {
     CandidateDAO candidateDAO
     JobDAO jobDAO
     CompanyDAO companyDAO
+    CompanyService companyService
     CompanyController controller
 
     def setup() {
@@ -24,7 +27,8 @@ class CompanyControllerTest extends Specification {
         candidateDAO = Mock(CandidateDAO, constructorArgs: [addressDAO, personDAO, competencyDAO])
         jobDAO = Mock(JobDAO, constructorArgs: [addressDAO, competencyDAO])
         companyDAO = Mock(CompanyDAO, constructorArgs: [addressDAO, personDAO])
-        controller = new CompanyController(companyDAO, candidateDAO, matchEventDAO, jobDAO)
+        companyService = Mock(CompanyService, constructorArgs: [companyDAO, candidateDAO, matchEventDAO, jobDAO])
+        controller = new CompanyController(companyService)
     }
 
     def "HandleGetAll"() {
@@ -48,10 +52,10 @@ class CompanyControllerTest extends Specification {
                 .cnpj("cnpj")
                 .build()
 
-        companyDAO.getAll() >> [fake1, fake2]
+        companyService.getAllCompanies() >> [fake1, fake2]
 
         when:
-        List<Company> companyList = controller.handleGetAll()
+        List<Company> companyList = controller.handleGetAllCompanies()
 
         then:
         companyList.size() == 2
@@ -67,7 +71,7 @@ class CompanyControllerTest extends Specification {
                 .cnpj("cnpj")
                 .build()
 
-        companyDAO.create(*_) >> createdCompany
+        companyService.createCompany(*_) >> createdCompany
 
         Address createdCompanyAddress = Address.builder()
                 .state("State")
@@ -88,31 +92,15 @@ class CompanyControllerTest extends Specification {
         result.cnpj == 'cnpj'
     }
 
-    def "HandleLikeCandidateAlreadyLiked"() {
-        given:
-        int idCompany = 2
-        int idCandidate = 5
-
-        companyDAO.isCandidateAlreadyLiked(idCompany, idCandidate) >> true
-
-        when:
-        controller.handleLikeCandidate(idCompany, idCandidate)
-
-        then:
-        0 * companyDAO.likeCandidate(_, _)
-    }
-
     def "HandleLikeCandidate"() {
         int idCompany = 2
         int idCandidate = 5
-
-        companyDAO.isCandidateAlreadyLiked(idCompany, idCandidate) >> false
-        jobDAO.getAllByCompanyId(idCompany) >> []
+        companyService.likeCandidate(idCompany, idCandidate) >> LikeResult.SUCCESS
 
         when:
-        controller.handleLikeCandidate(idCompany, idCandidate)
+        LikeResult result = controller.handleLikeCandidate(idCompany, idCandidate)
 
         then:
-        1 * companyDAO.likeCandidate(_, _)
+        result == LikeResult.SUCCESS
     }
 }
