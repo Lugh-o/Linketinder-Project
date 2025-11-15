@@ -45,7 +45,7 @@ class CandidateController extends Controller {
 
             // GET /api/v1/candidates
             if (method == "GET" && path == "/") {
-                JsonHandler.write(resp, attachPath(handleGetAll(), req))
+                JsonHandler.write(resp, attachPath(handleGetAllCandidates(), req))
                 return
             }
 
@@ -105,7 +105,7 @@ class CandidateController extends Controller {
     }
 
 
-    Response<List<CandidateDTO>> handleGetAll() {
+    Response<List<CandidateDTO>> handleGetAllCandidates() {
         return candidateService.getAllCandidates()
     }
 

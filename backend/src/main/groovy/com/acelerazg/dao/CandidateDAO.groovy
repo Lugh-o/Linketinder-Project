@@ -212,7 +212,9 @@ class CandidateDAO extends DAO {
             statement.setString(6, candidate.graduation)
             statement.executeUpdate()
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
-                if (resultSet.next()) candidate.idCandidate = resultSet.getInt("id")
+                if (resultSet.next()) {
+                    candidate.idCandidate = resultSet.getInt("id")
+                }
             }
             competencies.forEach { Competency c -> createCandidateCompetency(connection, candidate.idCandidate, c) }
 

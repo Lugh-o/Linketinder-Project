@@ -26,6 +26,9 @@ class CandidateService {
 
     Response<Candidate> getById(int id) {
         Candidate candidate = candidateDAO.getById(id)
+        if (candidate == null) {
+            return Response.error(HttpServletResponse.SC_NOT_FOUND, "Candidate not found");
+        }
         return Response.success(HttpServletResponse.SC_OK, candidate)
     }
 
@@ -34,35 +37,35 @@ class CandidateService {
         return Response.success(HttpServletResponse.SC_OK, anonymousCandidateDTOList)
     }
 
-    Response<Candidate> createCandidate(CandidateDTO createCandidateDTO) {
+    Response<Candidate> createCandidate(CandidateDTO candidateDTO) {
 
-        if (candidateDAO.getByEmail(createCandidateDTO.email)) {
+        if (candidateDAO.getByEmail(candidateDTO.email)) {
             return Response.error(HttpServletResponse.SC_CONFLICT,
                     "Email already registered",
-                    "The email " + createCandidateDTO.email + " is already used",
+                    "The email " + candidateDTO.email + " is already used",
                     "/api/v1/candidates")
         }
 
         Candidate candidate = Candidate.builder()
-                .description(createCandidateDTO.description)
-                .passwd(createCandidateDTO.passwd)
-                .email(createCandidateDTO.email)
-                .firstName(createCandidateDTO.firstName)
-                .lastName(createCandidateDTO.lastName)
-                .cpf(createCandidateDTO.cpf)
-                .birthday(createCandidateDTO.birthday)
-                .graduation(createCandidateDTO.graduation)
+                .description(candidateDTO.description)
+                .passwd(candidateDTO.passwd)
+                .email(candidateDTO.email)
+                .firstName(candidateDTO.firstName)
+                .lastName(candidateDTO.lastName)
+                .cpf(candidateDTO.cpf)
+                .birthday(candidateDTO.birthday)
+                .graduation(candidateDTO.graduation)
                 .build()
 
         Address address = Address.builder()
-                .state(createCandidateDTO.address.state)
-                .postalCode(createCandidateDTO.address.postalCode)
-                .country(createCandidateDTO.address.country)
-                .city(createCandidateDTO.address.city)
-                .street(createCandidateDTO.address.street)
+                .state(candidateDTO.address.state)
+                .postalCode(candidateDTO.address.postalCode)
+                .country(candidateDTO.address.country)
+                .city(candidateDTO.address.city)
+                .street(candidateDTO.address.street)
                 .build()
 
-        candidate = candidateDAO.create(candidate, address, createCandidateDTO.competencies)
+        candidate = candidateDAO.create(candidate, address, candidateDTO.competencies)
 
         return Response.success(HttpServletResponse.SC_CREATED, candidate)
     }
@@ -108,7 +111,7 @@ class CandidateService {
                     candidateDTO.address.street)
         }
 
-        List<Competency> updatedCompetencies = []
+        List<Competency> updatedCompetencies
         if (candidateDTO.has("competencies")) {
             updatedCompetencies = candidateDTO.competencies.collect { Competency c -> Competency.builder().name(c.name).build()
             }

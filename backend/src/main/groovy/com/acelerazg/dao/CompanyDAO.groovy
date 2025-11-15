@@ -1,5 +1,7 @@
 package com.acelerazg.dao
 
+import com.acelerazg.dto.CompanyDTO
+import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Address
 import com.acelerazg.model.Company
 import com.acelerazg.persistency.DatabaseHandler
@@ -20,67 +22,102 @@ class CompanyDAO extends DAO {
         this.personDAO = personDAO
     }
 
-    List<Company> getAll() {
+    List<CompanyDTO> getAll() {
         String sql = """
-        SELECT 
-            c.id as id_company, c.name, c.cnpj,
-            c.id_person, p.email, p.description, p.id_address
-        FROM company c
-        INNER JOIN person p ON c.id_person = p.id
+            SELECT 
+                c.id as id_company, c.name, c.cnpj, 
+                p.id as id_person, p.email, p.description, 
+                a.id as id_address, a.state, a.postal_code, a.country, a.street, a.city
+            FROM company c
+            INNER JOIN person p ON c.id_person = p.id
+            INNER JOIN address a ON p.id_address = a.id
         """
-        List<Company> companies = []
+        List<CompanyDTO> companies = []
 
         try (Connection connection = DatabaseHandler.getConnection()
              PreparedStatement statement = connection.prepareStatement(sql)
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                Company co = Company.builder()
-                        .idPerson(resultSet.getInt("id_person"))
-                        .email(resultSet.getString("email"))
-                        .description(resultSet.getString("description"))
-                        .idAddress(resultSet.getInt("id_address"))
-                        .idCompany(resultSet.getInt("id_company"))
-                        .cnpj(resultSet.getString("cnpj"))
+                Address address = Address.builder()
+                        .state(resultSet.getString("state"))
+                        .postalCode(resultSet.getString("postal_code"))
+                        .country(resultSet.getString("country"))
+                        .city(resultSet.getString("city"))
+                        .street(resultSet.getString("street"))
                         .build()
-                companies.add(co)
+
+                companies.add(new CompanyDTO(resultSet.getString("description"),
+                        resultSet.getString("email"),
+                        resultSet.getString("name"),
+                        resultSet.getString("cnpj"),
+                        resultSet.getInt("id_person"),
+                        address,
+                        resultSet.getInt("id_address"),
+                        resultSet.getInt("id_company")))
             }
+            return companies
+        } catch (Exception e) {
+            throw new DataAccessException("Error fetching candidates", e)
         }
-        return companies
     }
 
-    Company getById(int id) {
+    private CompanyDTO getCompanyGeneric(String sql, Object param) {
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setObject(1, param);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Address address = Address.builder()
+                            .state(resultSet.getString("state"))
+                            .postalCode(resultSet.getString("postal_code"))
+                            .country(resultSet.getString("country"))
+                            .street(resultSet.getString("street"))
+                            .city(resultSet.getString("city"))
+                            .build()
+
+                    return new CompanyDTO(resultSet.getString("description"),
+                            resultSet.getString("email"),
+                            resultSet.getString("name"),
+                            resultSet.getString("cnpj"),
+                            resultSet.getInt("id_person"),
+                            address,
+                            resultSet.getInt("id_address"),
+                            resultSet.getInt("id_company"))
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace()
+            throw new DataAccessException("Error fetching company", e)
+        }
+    }
+
+    CompanyDTO getById(int id) {
         String sql = """
             SELECT 
-                c.id as id_company, c.name, c.cnpj, c.id_person, 
-                p.email, p.description, p.passwd
-                a.state, a.postal_code, a.country, a.street, a.city
+                c.id as id_company, c.name, c.cnpj, 
+                p.id as id_person, p.email, p.description, p.passwd,
+                a.id as id_address, a.state, a.postal_code, a.country, a.street, a.city
             FROM company c
             INNER JOIN person p ON c.id_person = p.id
             INNER JOIN address a ON a.id = p.id_address
             WHERE c.id = ?        
         """
-        Company company = null
+        return getCompanyGeneric(sql, id)
+    }
 
-        try (Connection connection = DatabaseHandler.getConnection()
-             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            statement.setInt(1, id)
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    company = Company.builder()
-                            .idPerson(resultSet.getInt("id_person"))
-                            .email(resultSet.getString("email"))
-                            .description(resultSet.getString("description"))
-                            .passwd(resultSet.getString("passwd"))
-                            .idAddress(resultSet.getInt("id_address"))
-                            .idCompany(resultSet.getInt("id_company"))
-                            .name(resultSet.getString("name"))
-                            .cnpj(resultSet.getString("cnpj"))
-                            .build()
-                }
-            }
-        }
-        return company
+    CompanyDTO getByEmail(String email) {
+        String sql = """
+            SELECT 
+                c.id as id_company, c.name, c.cnpj, 
+                p.id as id_person, p.email, p.description, p.passwd,
+                a.id as id_address, a.state, a.postal_code, a.country, a.street, a.city
+            FROM company c
+            INNER JOIN person p ON c.id_person = p.id
+            INNER JOIN address a ON a.id = p.id_address
+            WHERE p.email = ?        
+        """
+        return getCompanyGeneric(sql, email)
     }
 
     Company create(Company company, Address address) {
@@ -103,16 +140,18 @@ class CompanyDAO extends DAO {
 
             statement.executeUpdate()
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
-                if (resultSet.next()) company.idCompany = resultSet.getInt(1)
+                if (resultSet.next()) {
+                    company.idCompany = resultSet.getInt(1)
+                }
             }
             connection.commit()
+            return company
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e
         } finally {
             DatabaseHandler.closeQuietly(connection)
         }
-        return company
     }
 
     Company update(int id, Company company, Address address) {
@@ -125,10 +164,21 @@ class CompanyDAO extends DAO {
         connection.autoCommit = false
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            Company currentCompany = getById(id).toModel()
+            if (currentCompany == null) {
+                throw new DataAccessException("Candidate not found")
+            }
+            company.idCompany = currentCompany.idCompany
+            company.idPerson = currentCompany.idPerson
+            company.idAddress = currentCompany.idAddress
+            company.email = company.email ?: currentCompany.email
+            company.description = company.description ?: currentCompany.description
+            company.passwd = company.passwd ?: currentCompany.passwd
 
-            Company currentCompany = getById(id)
+            if (address != null) {
+                addressDAO.update(connection, company.idAddress, address)
+            }
 
-            addressDAO.update(connection, currentCompany.idAddress, address)
             personDAO.update(connection, company)
 
             statement.setString(1, company.name)
@@ -137,13 +187,13 @@ class CompanyDAO extends DAO {
             statement.executeUpdate()
 
             connection.commit()
+            return getById(id).toModel()
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e
         } finally {
             DatabaseHandler.closeQuietly(connection)
         }
-        return getById(id)
     }
 
     void delete(int id) {

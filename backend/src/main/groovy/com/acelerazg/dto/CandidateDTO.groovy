@@ -60,13 +60,13 @@ class CandidateDTO {
 
         this.graduation = map.graduation
 
-        Address address = map.get("address") as Address
-        if (address instanceof Map) {
-            this.address = new Address(address.get("state") as String,
-                    address.get("postalCode") as String,
-                    address.get("country") as String,
-                    address.get("city") as String,
-                    address.get("street") as String)
+        def addressMap = map.address
+        if (addressMap instanceof Map) {
+            this.address = new Address(addressMap.get("state") as String,
+                    addressMap.get("postalCode") as String,
+                    addressMap.get("country") as String,
+                    addressMap.get("city") as String,
+                    addressMap.get("street") as String)
         } else {
             this.address = null
         }
