@@ -1,5 +1,6 @@
 plugins {
     id 'groovy'
+    id 'war'
 }
 
 group = 'com.acelerazg'
@@ -11,8 +12,10 @@ repositories {
 
 dependencies {
     implementation 'org.apache.groovy:groovy:4.0.6'
-    implementation 'org.postgresql:postgresql:42.7.8'
+    implementation 'org.apache.groovy:groovy-json:4.0.6'
+    compileOnly 'org.postgresql:postgresql:42.7.3'
 
+    providedCompile 'javax.servlet:javax.servlet-api:4.0.1'
     testImplementation 'org.spockframework:spock-core:2.4-M1-groovy-4.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-engine'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -21,6 +24,17 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+war {
+    archiveFileName = 'linketinder.war'
+
+    from('.') {
+        include '.env'
+        into ''
+    }
+
+    classpath = sourceSets.main.runtimeClasspath
 }
 
 tasks.register('migrate', JavaExec) {
@@ -37,4 +51,24 @@ tasks.register('run', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.acelerazg.Main'
     standardInput = System.in
+}
+
+File tomcatHome = file("/opt/tomcat")
+
+tasks.register('deployToTomcat') {
+    dependsOn war
+
+    doLast {
+        File tomcatWebapps = file("${tomcatHome}/webapps")
+        File warFile = tasks.war.archiveFile.get().asFile
+
+        copy {
+            from warFile
+            into tomcatWebapps
+        }
+        exec {
+            commandLine 'sudo', 'systemctl', 'restart', 'tomcat'
+        }
+    }
+
 }

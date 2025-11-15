@@ -7,4 +7,6 @@ class DataAccessException extends RuntimeException {
     DataAccessException(String message, Throwable cause) {
         super(message, cause)
     }
+
+    DataAccessException(String s) {}
 }

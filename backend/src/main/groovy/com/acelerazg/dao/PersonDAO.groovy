@@ -48,7 +48,6 @@ class PersonDAO {
             statement.setInt(4, person.idPerson)
             statement.executeUpdate()
 
-            connection.commit()
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e

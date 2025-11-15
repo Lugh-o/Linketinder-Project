@@ -1,6 +1,7 @@
 package com.acelerazg.dao
 
 import com.acelerazg.dto.AnonymousCandidateDTO
+import com.acelerazg.dto.CandidateDTO
 import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Address
 import com.acelerazg.model.Candidate
@@ -22,39 +23,55 @@ class CandidateDAO extends DAO {
         this.competencyDAO = competencyDAO
     }
 
-    List<Candidate> getAll() {
+    List<CandidateDTO> getAll() {
         String sql = """            
             SELECT 
                 c.id as id_candidate, c.first_name, c.last_name, c.cpf, c.birthday, c.graduation,
-                p.id as id_person, p.email, p.description, p.id_address
+                p.id as id_person, p.email, p.description, 
+                a.id as id_address, a.state, a.postal_code, a.country, a.street, a.city,
+                COALESCE(STRING_AGG(co.name, ', '), '') AS competencies
             FROM candidate c
             INNER JOIN person p ON c.id_person = p.id
+            INNER JOIN address a ON p.id_address = a.id
+            INNER JOIN candidate_competency cc ON cc.id_candidate = c.id
+            INNER JOIN competency co ON cc.id_competency = co.id
+            GROUP BY c.id, p.id, a.id
         """
 
-        List<Candidate> candidates = []
+        List<CandidateDTO> candidates = []
 
         try (Connection connection = DatabaseHandler.getConnection()
              PreparedStatement statement = connection.prepareStatement(sql)
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                Candidate ca = Candidate.builder()
-                        .idPerson(resultSet.getInt("id_person"))
-                        .email(resultSet.getString("email"))
-                        .description(resultSet.getString("description"))
-                        .idAddress(resultSet.getInt("id_address"))
-                        .idCandidate(resultSet.getInt("id_candidate"))
-                        .firstName(resultSet.getString("first_name"))
-                        .lastName(resultSet.getString("last_name"))
-                        .cpf(resultSet.getString("cpf"))
-                        .birthday(resultSet.getDate("birthday").toLocalDate())
-                        .graduation(resultSet.getString("graduation"))
+                String competencyString = resultSet.getString("competencies") ?: ""
+                List<Competency> competencyList = competencyString ? competencyString.split(', ').collect { name -> Competency.builder().name(name.trim()).build() } : []
+
+                Address address = Address.builder()
+                        .state(resultSet.getString("state"))
+                        .postalCode(resultSet.getString("postal_code"))
+                        .country(resultSet.getString("country"))
+                        .street(resultSet.getString("street"))
+                        .city(resultSet.getString("city"))
                         .build()
-                candidates.add(ca)
+
+                candidates.add(new CandidateDTO(resultSet.getString("description"),
+                        resultSet.getString("email"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getString("cpf"),
+                        resultSet.getDate("birthday")?.toLocalDate(),
+                        resultSet.getString("graduation"),
+                        address,
+                        competencyList,
+                        resultSet.getInt("id_person"),
+                        resultSet.getInt("id_address"),
+                        resultSet.getInt("id_candidate")))
             }
+            return candidates
         } catch (Exception e) {
             throw new DataAccessException("Error fetching candidates", e)
         }
-        return candidates
     }
 
     private Candidate getCandidateGeneric(String sql, Object param) {
@@ -168,11 +185,10 @@ class CandidateDAO extends DAO {
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) return true
             }
-
+            return false
         } catch (Exception e) {
             throw new DataAccessException("Error fetching likes", e)
         }
-        return false
     }
 
     Candidate create(Candidate candidate, Address address, List<Competency> competencies) {
@@ -201,13 +217,13 @@ class CandidateDAO extends DAO {
             competencies.forEach { Competency c -> createCandidateCompetency(connection, candidate.idCandidate, c) }
 
             connection.commit()
+            return candidate
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw new DataAccessException("Error creating candidate", e)
         } finally {
             DatabaseHandler.closeQuietly(connection)
         }
-        return candidate
     }
 
     void createCandidateCompetency(Connection connection, int idCandidate, Competency competency) {
@@ -227,7 +243,7 @@ class CandidateDAO extends DAO {
 
     Candidate update(int id, Candidate candidate, Address address, List<Competency> newCompetencies) {
         String sql = """
-            UPDATE candidate SET first_name = ?, last_name = ?, cpf = ?, date_of_birth = ?, graduation = ?
+            UPDATE candidate SET first_name = ?, last_name = ?, cpf = ?, birthday = ?, graduation = ?
             WHERE id = ?
         """
 
@@ -236,10 +252,26 @@ class CandidateDAO extends DAO {
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             Candidate currentCandidate = getById(id)
+            if (currentCandidate == null) {
+                throw new DataAccessException("Candidate not found")
+            }
 
-            addressDAO.update(connection, currentCandidate.idAddress, address)
+            candidate.idCandidate = currentCandidate.idCandidate
+            candidate.idPerson = currentCandidate.idPerson
+            candidate.idAddress = currentCandidate.idAddress
+            candidate.email = candidate.email ?: currentCandidate.email
+            candidate.description = candidate.description ?: currentCandidate.description
+            candidate.passwd = candidate.passwd ?: currentCandidate.passwd
+
+            if (address != null) {
+                addressDAO.update(connection, candidate.idAddress, address)
+            }
+
             personDAO.update(connection, candidate)
-            updateCandidateCompetencies(connection, id, newCompetencies)
+
+            if (newCompetencies != null) {
+                updateCandidateCompetencies(connection, id, newCompetencies)
+            }
 
             statement.setString(1, candidate.firstName)
             statement.setString(2, candidate.lastName)
@@ -250,13 +282,13 @@ class CandidateDAO extends DAO {
             statement.executeUpdate()
 
             connection.commit()
+            return getById(id)
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw new DataAccessException("Error updating candidate", e)
         } finally {
             DatabaseHandler.closeQuietly(connection)
         }
-        return getById(id)
     }
 
     void updateCandidateCompetencies(Connection connection, int idCandidate, List<Competency> newCompetencies) {
