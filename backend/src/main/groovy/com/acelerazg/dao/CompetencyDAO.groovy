@@ -12,24 +12,6 @@ import java.sql.Statement
 
 @CompileStatic
 class CompetencyDAO extends DAO {
-    List<Competency> getAll() {
-        String sql = "SELECT * FROM competency"
-        List<Competency> competencies = []
-
-        try (Connection connection = DatabaseHandler.getConnection()
-             PreparedStatement statement = connection.prepareStatement(sql)
-             ResultSet resultSet = statement.executeQuery()) {
-            while (resultSet.next()) {
-                Competency c = Competency.builder()
-                        .id(resultSet.getInt("id"))
-                        .name(resultSet.getString("name"))
-                        .build()
-                competencies.add(c)
-            }
-        }
-        return competencies
-    }
-
     Competency getByName(Connection connection, String name) {
         String sql = """
             SELECT * from competency c

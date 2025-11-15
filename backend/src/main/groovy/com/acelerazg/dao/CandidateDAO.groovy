@@ -45,7 +45,7 @@ class CandidateDAO extends DAO {
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 String competencyString = resultSet.getString("competencies") ?: ""
-                List<Competency> competencyList = competencyString ? competencyString.split(', ').collect { name -> Competency.builder().name(name.trim()).build() } : []
+                List<Competency> competencyList = competencyString ? competencyString.split(', ').collect { String name -> Competency.builder().name(name.trim()).build() } : []
 
                 Address address = Address.builder()
                         .state(resultSet.getString("state"))
@@ -80,21 +80,21 @@ class CandidateDAO extends DAO {
 
             statement.setObject(1, param)
             try (ResultSet resultSet = statement.executeQuery()) {
-                if (!resultSet.next()) return null
-                Candidate ca = Candidate.builder()
-                        .idPerson(resultSet.getInt("id_person"))
-                        .email(resultSet.getString("email"))
-                        .description(resultSet.getString("description"))
-                        .passwd(resultSet.getString("passwd"))
-                        .idAddress(resultSet.getInt("id_address"))
-                        .idCandidate(resultSet.getInt("id_candidate"))
-                        .firstName(resultSet.getString("first_name"))
-                        .lastName(resultSet.getString("last_name"))
-                        .cpf(resultSet.getString("cpf"))
-                        .birthday(resultSet.getDate("birthday").toLocalDate())
-                        .graduation(resultSet.getString("graduation"))
-                        .build()
-                return ca
+                if (resultSet.next()) {
+                    return Candidate.builder()
+                            .idPerson(resultSet.getInt("id_person"))
+                            .email(resultSet.getString("email"))
+                            .description(resultSet.getString("description"))
+                            .passwd(resultSet.getString("passwd"))
+                            .idAddress(resultSet.getInt("id_address"))
+                            .idCandidate(resultSet.getInt("id_candidate"))
+                            .firstName(resultSet.getString("first_name"))
+                            .lastName(resultSet.getString("last_name"))
+                            .cpf(resultSet.getString("cpf"))
+                            .birthday(resultSet.getDate("birthday").toLocalDate())
+                            .graduation(resultSet.getString("graduation"))
+                            .build()
+                }
             }
         } catch (Exception e) {
             throw new DataAccessException("Error fetching candidate", e)
@@ -230,15 +230,18 @@ class CandidateDAO extends DAO {
 
     void createCandidateCompetency(Connection connection, int idCandidate, Competency competency) {
         Competency existing = competencyDAO.getByName(connection, competency.name)
-        if (!existing) existing = competencyDAO.createWithConnection(connection, competency)
-
+        if (!existing) {
+            existing = competencyDAO.createWithConnection(connection, competency)
+        }
         String sql = "INSERT INTO candidate_competency (id_candidate, id_competency) VALUES (?, ?);"
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idCandidate)
             statement.setInt(2, existing.id)
             statement.executeUpdate()
         } catch (Exception e) {
-            if (connection != null) connection.rollback()
+            if (connection != null) {
+                connection.rollback()
+            }
             throw new DataAccessException("Error creating candidate competency", e)
         }
     }

@@ -27,7 +27,7 @@ class CandidateService {
     Response<Candidate> getById(int id) {
         Candidate candidate = candidateDAO.getById(id)
         if (candidate == null) {
-            return Response.error(HttpServletResponse.SC_NOT_FOUND, "Candidate not found");
+            return Response.error(HttpServletResponse.SC_NOT_FOUND, "Candidate not found")
         }
         return Response.success(HttpServletResponse.SC_OK, candidate)
     }

@@ -6,6 +6,7 @@ import com.acelerazg.dao.CompanyDAO
 import com.acelerazg.dao.JobDAO
 import com.acelerazg.dao.MatchEventDAO
 import com.acelerazg.dto.CompanyDTO
+import com.acelerazg.dto.JobDTO
 import com.acelerazg.model.Address
 import com.acelerazg.model.Company
 import com.acelerazg.model.Job
@@ -35,7 +36,7 @@ class CompanyService {
     Response<CompanyDTO> getById(int id) {
         CompanyDTO company = companyDAO.getById(id)
         if (company == null) {
-            return Response.error(HttpServletResponse.SC_NOT_FOUND, "Company not found");
+            return Response.error(HttpServletResponse.SC_NOT_FOUND, "Company not found")
         }
         return Response.success(HttpServletResponse.SC_OK, company)
     }
@@ -83,9 +84,10 @@ class CompanyService {
                        idCandidate: idCandidate,
                        match      : false]
 
-        List<Job> likedJobs = jobDAO.getAllByCompanyId(idCompany)
+        List<JobDTO> likedJobs = jobDAO.getAllByCompanyId(idCompany)
 
-        likedJobs.any { Job job ->
+        likedJobs.any { JobDTO jobDTO ->
+            Job job = jobDTO.toModel()
             if (candidateDAO.hasLikedJob(idCandidate, job.id)) {
                 matchEventDAO.create(job.id, idCandidate)
                 payload.match = true
@@ -96,13 +98,14 @@ class CompanyService {
     }
 
     Response<Company> updateCompany(int id, CompanyDTO companyDTO) {
-        Company existing = companyDAO.getById(id).toModel()
-        if (!existing) {
+        CompanyDTO existingDTO = companyDAO.getById(id)
+        if (!existingDTO) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND,
                     "Company not found",
                     "No company exists with id " + id,
                     "/api/v1/companies/" + id)
         }
+        Company existing = existingDTO.toModel()
 
         companyDTO.idPerson = existing.idPerson
         companyDTO.idAddress = existing.idAddress
@@ -129,7 +132,7 @@ class CompanyService {
     }
 
     Response<Void> deleteCompany(int id) {
-        Company existing = companyDAO.getById(id).toModel()
+        CompanyDTO existing = companyDAO.getById(id)
         if (!existing) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND,
                     "Company not found",

@@ -65,7 +65,7 @@ class CompanyDAO extends DAO {
         try (Connection connection = DatabaseHandler.getConnection()
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setObject(1, param);
+            statement.setObject(1, param)
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     Address address = Address.builder()
