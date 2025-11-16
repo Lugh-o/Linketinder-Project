@@ -2,7 +2,6 @@ package com.acelerazg.dao
 
 import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Competency
-import com.acelerazg.persistency.DatabaseHandler
 import groovy.transform.CompileStatic
 
 import java.sql.Connection

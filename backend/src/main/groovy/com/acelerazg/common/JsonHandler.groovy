@@ -1,6 +1,6 @@
-package com.acelerazg.utils
+package com.acelerazg.common
 
-import com.acelerazg.common.Response
+
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
@@ -21,15 +21,13 @@ class JsonHandler {
     static void write(HttpServletResponse resp, Response<?> response) {
         resp.status = response.statusCode
 
-        Map payload = [
-                statusCode: response.statusCode,
-                message   : response.message,
-                error     : response.error,
-                details   : response.details,
-                path      : response.path,
-                timestamp : response.timestamp,
-                data      : response.data
-        ]
+        Map payload = [statusCode: response.statusCode,
+                       message   : response.message,
+                       error     : response.error,
+                       details   : response.details,
+                       path      : response.path,
+                       timestamp : response.timestamp,
+                       data      : response.data]
 
         resp.writer.write(JsonOutput.toJson(payload))
     }
@@ -37,12 +35,10 @@ class JsonHandler {
     static void writeError(HttpServletResponse resp, int status, String msg) {
         resp.status = status
 
-        Map payload = [
-                statusCode: status,
-                message   : msg,
-                error     : statusToName(status),
-                timestamp : new Date().toString()
-        ]
+        Map payload = [statusCode: status,
+                       message   : msg,
+                       error     : statusToName(status),
+                       timestamp : new Date().toString()]
 
         resp.writer.write(JsonOutput.toJson(payload))
     }
@@ -56,7 +52,7 @@ class JsonHandler {
             case 409: return "Conflict"
             case 422: return "Unprocessable Entity"
             case 500: return "Internal Server Error"
-            default : return "Error"
+            default: return "Error"
         }
     }
 }

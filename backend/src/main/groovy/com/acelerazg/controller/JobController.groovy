@@ -1,13 +1,12 @@
 package com.acelerazg.controller
 
+import com.acelerazg.common.JsonHandler
 import com.acelerazg.common.Response
 import com.acelerazg.dao.AddressDAO
 import com.acelerazg.dao.CompetencyDAO
 import com.acelerazg.dao.JobDAO
-import com.acelerazg.dto.JobDTO
 import com.acelerazg.model.Job
 import com.acelerazg.service.JobService
-import com.acelerazg.utils.JsonHandler
 import groovy.transform.CompileStatic
 
 import javax.servlet.annotation.WebServlet
@@ -55,7 +54,7 @@ class JobController extends Controller {
             // POST /api/v1/jobs
             if (method == "POST" && path == "/") {
                 Map body = JsonHandler.parseJsonBody(req)
-                JobDTO dto = new JobDTO(body)
+                Job dto = new Job(body)
                 JsonHandler.write(resp, attachPath(handleCreateJob(dto), req))
                 return
             }
@@ -63,7 +62,7 @@ class JobController extends Controller {
             // PUT /api/v1/jobs/{id}
             if (method == "PUT" && path.matches("/\\d+")) {
                 Map body = JsonHandler.parseJsonBody(req)
-                JobDTO dto = new JobDTO(body)
+                Job dto = new Job(body)
                 int id = (path.split("/")[1] as int)
                 JsonHandler.write(resp, attachPath(handleUpdateJob(id, dto), req))
                 return
@@ -83,20 +82,19 @@ class JobController extends Controller {
         }
     }
 
-
-    Response<List<JobDTO>> handleGetAllByCompanyId(int id) {
+    Response<List<Job>> handleGetAllByCompanyId(int id) {
         return jobService.getAllByCompanyId(id)
     }
 
-    Response<JobDTO> handleGetById(int id) {
+    Response<Job> handleGetById(int id) {
         return jobService.getById(id)
     }
 
-    Response<Job> handleCreateJob(JobDTO createJobDTO) {
+    Response<Job> handleCreateJob(Job createJobDTO) {
         return jobService.createJob(createJobDTO)
     }
 
-    Response<Job> handleUpdateJob(int id, JobDTO jobDTO) {
+    Response<Job> handleUpdateJob(int id, Job jobDTO) {
         return jobService.updateJob(id, jobDTO)
     }
 

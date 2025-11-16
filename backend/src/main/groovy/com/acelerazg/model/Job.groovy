@@ -1,27 +1,56 @@
 package com.acelerazg.model
 
-import com.acelerazg.model.builder.JobBuilder
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
 @CompileStatic
-@ToString(includeSuperProperties = true, includePackage = false, includeNames = true, ignoreNulls = true)
+@ToString(includeSuperProperties = true, includePackage = false, includeNames = true)
 class Job {
-    int id
     String name
     String description
-    int idAddress
-    int idCompany
+    Address address
+    List<Competency> competencies
+    Integer idCompany
+    Integer idAddress
+    Integer idJob
+    Map originalMap
 
-    Job(int id, String name, String description, int idAddress, int idCompany) {
-        this.id = id
+    Job(String name, String description, Address address, List<Competency> competencies, Integer idCompany, Integer idAddress, Integer idJob) {
         this.name = name
         this.description = description
-        this.idAddress = idAddress
+        this.address = address
+        this.competencies = competencies ?: []
         this.idCompany = idCompany
+        this.idAddress = idAddress
+        this.idJob = idJob
     }
 
-    static JobBuilder builder() {
-        return new JobBuilder()
+    Job(Map map) {
+        this.originalMap = map
+        this.name = map.name
+        this.description = map.description
+        this.idCompany = map.idCompany as Integer
+        this.idJob = map.idJob as Integer
+
+        def addressMap = map.address
+        if (addressMap instanceof Map) {
+            this.address = new Address(addressMap.get("state") as String,
+                    addressMap.get("postalCode") as String,
+                    addressMap.get("country") as String,
+                    addressMap.get("city") as String,
+                    addressMap.get("street") as String)
+        } else {
+            this.address = null
+        }
+
+        this.competencies = map.competencies instanceof List ? map.competencies.collect { Object name ->
+            Competency.builder()
+                    .name(name as String)
+                    .build()
+        } : []
+    }
+
+    boolean has(String key) {
+        return originalMap.containsKey(key)
     }
 }

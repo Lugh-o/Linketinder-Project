@@ -1,26 +1,48 @@
 package com.acelerazg.model
 
-import com.acelerazg.model.builder.CompanyBuilder
+
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
 @CompileStatic
-@ToString(includeSuperProperties = true, includePackage = false, includeNames = true, ignoreNulls = true)
+@ToString(includeSuperProperties = true, includePackage = false, includeNames = true)
 class Company extends Person {
-    int idCompany
+    Integer idCompany
     String name
     String cnpj
-    int idPerson
 
-    Company(int idPerson, String email, String description, String passwd, int idAddress, int idCompany, String name, String cnpj) {
-        super(idPerson, email, description, passwd, idAddress)
+    Company(String description, String email, String name, String cnpj, Integer idPerson, Address address, Integer idAddress, Integer idCompany) {
+        super(idPerson, description, null, email, idAddress, address, [:])
         this.idCompany = idCompany
         this.name = name
         this.cnpj = cnpj
-        this.idPerson = idPerson
     }
 
-    static CompanyBuilder builder(){
-        return new CompanyBuilder()
+    Company(Map map) {
+        super(map.idPerson as Integer,
+                map.description as String,
+                map.passwd as String,
+                map.email as String,
+                map.idAddress as Integer,
+                null,
+                map)
+        this.name = map.name as String
+        this.cnpj = map.cnpj as String
+        this.idCompany = map.idCompany as Integer
+
+        def addressMap = map.address
+        if (addressMap instanceof Map) {
+            this.address = new Address(addressMap.state as String,
+                    addressMap.postalCode as String,
+                    addressMap.country as String,
+                    addressMap.city as String,
+                    addressMap.street as String)
+        } else {
+            this.address = null
+        }
+    }
+
+    boolean has(String key) {
+        return originalMap.containsKey(key)
     }
 }

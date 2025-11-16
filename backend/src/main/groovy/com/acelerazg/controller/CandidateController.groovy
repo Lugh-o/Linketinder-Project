@@ -1,15 +1,14 @@
 package com.acelerazg.controller
 
+import com.acelerazg.common.JsonHandler
 import com.acelerazg.common.Response
 import com.acelerazg.dao.AddressDAO
 import com.acelerazg.dao.CandidateDAO
 import com.acelerazg.dao.CompetencyDAO
 import com.acelerazg.dao.PersonDAO
 import com.acelerazg.dto.AnonymousCandidateDTO
-import com.acelerazg.dto.CandidateDTO
 import com.acelerazg.model.Candidate
 import com.acelerazg.service.CandidateService
-import com.acelerazg.utils.JsonHandler
 import groovy.transform.CompileStatic
 
 import javax.servlet.annotation.WebServlet
@@ -66,7 +65,7 @@ class CandidateController extends Controller {
             // POST /api/v1/candidates
             if (method == "POST" && path == "/") {
                 Map body = JsonHandler.parseJsonBody(req)
-                CandidateDTO dto = new CandidateDTO(body)
+                Candidate dto = new Candidate(body)
                 JsonHandler.write(resp, attachPath(handleCreateCandidate(dto), req))
                 return
             }
@@ -83,7 +82,7 @@ class CandidateController extends Controller {
             // PUT /api/v1/candidates/{id}
             if (method == "PUT" && path.matches("/\\d+")) {
                 Map body = JsonHandler.parseJsonBody(req)
-                CandidateDTO dto = new CandidateDTO(body)
+                Candidate dto = new Candidate(body)
                 int id = (path.split("/")[1] as int)
                 JsonHandler.write(resp, attachPath(handleUpdateCandidate(id, dto), req))
                 return
@@ -104,8 +103,7 @@ class CandidateController extends Controller {
         }
     }
 
-
-    Response<List<CandidateDTO>> handleGetAllCandidates() {
+    Response<List<Candidate>> handleGetAllCandidates() {
         return candidateService.getAllCandidates()
     }
 
@@ -117,7 +115,7 @@ class CandidateController extends Controller {
         return candidateService.getAllInterestedInJob(idJob)
     }
 
-    Response<Candidate> handleCreateCandidate(CandidateDTO candidateDTO) {
+    Response<Candidate> handleCreateCandidate(Candidate candidateDTO) {
         return candidateService.createCandidate(candidateDTO)
     }
 
@@ -125,7 +123,7 @@ class CandidateController extends Controller {
         return candidateService.likeJob(idCandidate, idJob)
     }
 
-    Response<Candidate> handleUpdateCandidate(int id, CandidateDTO candidateDTO) {
+    Response<Candidate> handleUpdateCandidate(int id, Candidate candidateDTO) {
         return candidateService.updateCandidate(id, candidateDTO)
     }
 

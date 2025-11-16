@@ -1,20 +1,29 @@
 package com.acelerazg.model
 
+
 import groovy.transform.CompileStatic
 
 @CompileStatic
 abstract class Person {
-    int idPerson
-    String email
+    Integer idPerson
     String description
     String passwd
-    int idAddress
+    String email
+    Integer idAddress
+    Address address
+    Map originalMap = [:]
 
-    Person(int idPerson, String email, String description, String passwd, int idAddress) {
+    Person(Integer idPerson, String description, String passwd, String email, Integer idAddress, Address address, Map originalMap) {
         this.idPerson = idPerson
-        this.email = email
         this.description = description
         this.passwd = passwd
+        this.email = email
         this.idAddress = idAddress
+        this.address = address
+        this.originalMap = originalMap
+    }
+
+    boolean has(String key) {
+        return originalMap?.containsKey(key) == true
     }
 }

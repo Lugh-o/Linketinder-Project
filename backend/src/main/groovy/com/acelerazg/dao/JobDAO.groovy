@@ -1,6 +1,5 @@
 package com.acelerazg.dao
 
-import com.acelerazg.dto.JobDTO
 import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Address
 import com.acelerazg.model.Competency
@@ -23,7 +22,7 @@ class JobDAO extends DAO {
         this.competencyDAO = competencyDAO
     }
 
-    List<JobDTO> getAllByCompanyId(int id) {
+    List<Job> getAllByCompanyId(int id) {
         String sql = """
             SELECT
                 j.id as id_job, j.name, j.description,
@@ -39,7 +38,7 @@ class JobDAO extends DAO {
             WHERE id_company = ?
             GROUP BY j.id, c.id, a.id;
         """
-        List<JobDTO> jobs = []
+        List<Job> jobs = []
 
         try (Connection connection = DatabaseHandler.getConnection()
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -58,7 +57,7 @@ class JobDAO extends DAO {
                             .city(resultSet.getString("city"))
                             .build()
 
-                    jobs.add(new JobDTO(resultSet.getString("name"),
+                    jobs.add(new Job(resultSet.getString("name"),
                             resultSet.getString("description"),
                             address,
                             competencyList,
@@ -73,7 +72,7 @@ class JobDAO extends DAO {
         }
     }
 
-    JobDTO getById(int id) {
+    Job getById(int id) {
         String sql = """
             SELECT
                 j.id as id_job, j.name, j.description,
@@ -106,7 +105,7 @@ class JobDAO extends DAO {
                             .city(resultSet.getString("city"))
                             .build()
 
-                    return new JobDTO(resultSet.getString("name"),
+                    return new Job(resultSet.getString("name"),
                             resultSet.getString("description"),
                             address,
                             competencyList,
@@ -120,7 +119,7 @@ class JobDAO extends DAO {
         }
     }
 
-    Job create(Job job, Address address, List<Competency> competencies) {
+    Job create(Job jobDTO) {
         String sql = """
             INSERT INTO job (name, description, id_company, id_address) VALUES
             (?, ?, ?, ?);
@@ -131,21 +130,21 @@ class JobDAO extends DAO {
 
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            job.idAddress = addressDAO.create(connection, address)
+            jobDTO.idAddress = addressDAO.create(connection, jobDTO.address)
 
-            statement.setString(1, job.name)
-            statement.setString(2, job.description)
-            statement.setInt(3, job.idCompany)
-            statement.setInt(4, job.idAddress)
+            statement.setString(1, jobDTO.name)
+            statement.setString(2, jobDTO.description)
+            statement.setInt(3, jobDTO.idCompany)
+            statement.setInt(4, jobDTO.idAddress)
             statement.executeUpdate()
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
-                if (resultSet.next()) job.id = resultSet.getInt("id")
+                if (resultSet.next()) jobDTO.idJob = resultSet.getInt("id")
             }
 
-            competencies.forEach { Competency c -> createJobCompetency(connection, job.id, c) }
+            jobDTO.competencies.forEach { Competency c -> createJobCompetency(connection, jobDTO.idJob, c) }
 
             connection.commit()
-            return job
+            return jobDTO
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw new DataAccessException("Error creating job", e)
@@ -173,7 +172,7 @@ class JobDAO extends DAO {
         }
     }
 
-    Job update(int id, Job job, Address address, List<Competency> newCompetencies) {
+    Job update(int id, Job jobDTO) {
         String sql = """
             UPDATE job SET name = ?, description = ?
             WHERE id = ?
@@ -183,31 +182,31 @@ class JobDAO extends DAO {
         connection.autoCommit = false
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            Job currentJob = getById(id).toModel()
+            Job currentJob = getById(id)
             if (currentJob == null) {
                 throw new DataAccessException("Job not found")
             }
 
-            job.name = job.name ?: currentJob.name
-            job.description = job.description ?: currentJob.description
-            job.idAddress = currentJob.idAddress
-            job.idCompany = currentJob.idCompany
+            jobDTO.name = jobDTO.name ?: currentJob.name
+            jobDTO.description = jobDTO.description ?: currentJob.description
+            jobDTO.idAddress = currentJob.idAddress
+            jobDTO.idCompany = currentJob.idCompany
 
-            if (address != null) {
-                addressDAO.update(connection, job.idAddress, address)
+            if (jobDTO.address != null) {
+                addressDAO.update(connection, jobDTO.idAddress, jobDTO.address)
             }
 
-            if (newCompetencies != null) {
-                updateJobCompetencies(connection, id, newCompetencies)
+            if (jobDTO.competencies != null) {
+                updateJobCompetencies(connection, id, jobDTO.competencies)
             }
 
-            statement.setString(1, job.name)
-            statement.setString(2, job.description)
+            statement.setString(1, jobDTO.name)
+            statement.setString(2, jobDTO.description)
             statement.setInt(3, id)
             statement.executeUpdate()
 
             connection.commit()
-            return getById(id).toModel()
+            return getById(id)
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e

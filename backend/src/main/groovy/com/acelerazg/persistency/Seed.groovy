@@ -1,6 +1,6 @@
 package com.acelerazg.persistency
 
-import com.acelerazg.utils.EnvHandler
+import com.acelerazg.common.EnvHandler
 
 class Seed {
     static void main(String[] args) {

@@ -3,7 +3,7 @@
 //import com.acelerazg.dao.AddressDAO
 //import com.acelerazg.dao.CompetencyDAO
 //import com.acelerazg.dao.JobDAO
-//import com.acelerazg.dto.JobDTO
+//import com.acelerazg.model.JobDTO
 //import com.acelerazg.model.Address
 //import com.acelerazg.model.Competency
 //import com.acelerazg.model.Job

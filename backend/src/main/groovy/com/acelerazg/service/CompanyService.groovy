@@ -5,8 +5,6 @@ import com.acelerazg.dao.CandidateDAO
 import com.acelerazg.dao.CompanyDAO
 import com.acelerazg.dao.JobDAO
 import com.acelerazg.dao.MatchEventDAO
-import com.acelerazg.dto.CompanyDTO
-import com.acelerazg.dto.JobDTO
 import com.acelerazg.model.Address
 import com.acelerazg.model.Company
 import com.acelerazg.model.Job
@@ -28,46 +26,30 @@ class CompanyService {
         this.jobDAO = jobDAO
     }
 
-    Response<List<CompanyDTO>> getAllCompanies() {
-        List<CompanyDTO> companyList = companyDAO.getAll()
+    Response<List<Company>> getAllCompanies() {
+        List<Company> companyList = companyDAO.getAll()
         return Response.success(HttpServletResponse.SC_OK, companyList)
     }
 
-    Response<CompanyDTO> getById(int id) {
-        CompanyDTO company = companyDAO.getById(id)
+    Response<Company> getById(int id) {
+        Company company = companyDAO.getById(id)
         if (company == null) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND, "Company not found")
         }
         return Response.success(HttpServletResponse.SC_OK, company)
     }
 
-    Response<Company> createCompany(CompanyDTO CompanyDTO) {
-        if (companyDAO.getByEmail(CompanyDTO.email)) {
+    Response<Company> createCompany(Company company) {
+        if (companyDAO.getByEmail(company.email)) {
             return Response.error(HttpServletResponse.SC_CONFLICT,
                     "Email already registered",
-                    "The email " + CompanyDTO.email + " is already used",
+                    "The email " + company.email + " is already used",
                     "/api/v1/candidates")
         }
 
-        Company company = Company.builder()
-                .description(CompanyDTO.description)
-                .passwd(CompanyDTO.passwd)
-                .email(CompanyDTO.email)
-                .name(CompanyDTO.name)
-                .cnpj(CompanyDTO.cnpj)
-                .build()
+        Company createdCompany = companyDAO.create(company)
 
-        Address address = Address.builder()
-                .state(CompanyDTO.address.state)
-                .postalCode(CompanyDTO.address.postalCode)
-                .country(CompanyDTO.address.country)
-                .city(CompanyDTO.address.city)
-                .street(CompanyDTO.address.street)
-                .build()
-
-        company = companyDAO.create(company, address)
-
-        return Response.success(HttpServletResponse.SC_CREATED, company)
+        return Response.success(HttpServletResponse.SC_CREATED, createdCompany)
     }
 
     Response<Map> likeCandidate(int idCompany, int idCandidate) {
@@ -84,12 +66,11 @@ class CompanyService {
                        idCandidate: idCandidate,
                        match      : false]
 
-        List<JobDTO> likedJobs = jobDAO.getAllByCompanyId(idCompany)
+        List<Job> likedJobs = jobDAO.getAllByCompanyId(idCompany)
 
-        likedJobs.any { JobDTO jobDTO ->
-            Job job = jobDTO.toModel()
-            if (candidateDAO.hasLikedJob(idCandidate, job.id)) {
-                matchEventDAO.create(job.id, idCandidate)
+        likedJobs.any { Job jobDTO ->
+            if (candidateDAO.hasLikedJob(idCandidate, jobDTO.idJob)) {
+                matchEventDAO.create(jobDTO.idJob, idCandidate)
                 payload.match = true
                 return Response.success(HttpServletResponse.SC_CREATED, payload)
             }
@@ -97,42 +78,40 @@ class CompanyService {
         return Response.success(HttpServletResponse.SC_CREATED, payload)
     }
 
-    Response<Company> updateCompany(int id, CompanyDTO companyDTO) {
-        CompanyDTO existingDTO = companyDAO.getById(id)
+    Response<Company> updateCompany(int id, Company company) {
+        Company existingDTO = companyDAO.getById(id)
         if (!existingDTO) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND,
                     "Company not found",
                     "No company exists with id " + id,
                     "/api/v1/companies/" + id)
         }
-        Company existing = existingDTO.toModel()
 
-        companyDTO.idPerson = existing.idPerson
-        companyDTO.idAddress = existing.idAddress
-        companyDTO.idCompany = existing.idCompany
+        company.idPerson = existingDTO.idPerson
+        company.idAddress = existingDTO.idAddress
+        company.idCompany = existingDTO.idCompany
 
-        if (companyDTO.has("name")) existing.name = companyDTO.name
-        if (companyDTO.has("cnpj")) existing.cnpj = companyDTO.cnpj
+        if (company.has("name")) existingDTO.name = company.name
+        if (company.has("cnpj")) existingDTO.cnpj = company.cnpj
 
-        Address updatedAddress = null
-        if (companyDTO.has("address") && companyDTO.address) {
-            updatedAddress = new Address(companyDTO.address.state,
-                    companyDTO.address.postalCode,
-                    companyDTO.address.country,
-                    companyDTO.address.city,
-                    companyDTO.address.street)
+        if (company.has("address") && company.address) {
+            existingDTO.address = new Address(company.address.state,
+                    company.address.postalCode,
+                    company.address.country,
+                    company.address.city,
+                    company.address.street)
         }
 
-        if (companyDTO.has("email")) existing.email = companyDTO.email
-        if (companyDTO.has("description")) existing.description = companyDTO.description
-        if (companyDTO.has("passwd")) existing.passwd = companyDTO.passwd
+        if (company.has("email")) existingDTO.email = company.email
+        if (company.has("description")) existingDTO.description = company.description
+        if (company.has("passwd")) existingDTO.passwd = company.passwd
 
-        Company finalCompany = companyDAO.update(id, existing, updatedAddress)
+        Company finalCompany = companyDAO.update(id, existingDTO)
         return Response.success(HttpServletResponse.SC_OK, finalCompany)
     }
 
     Response<Void> deleteCompany(int id) {
-        CompanyDTO existing = companyDAO.getById(id)
+        Company existing = companyDAO.getById(id)
         if (!existing) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND,
                     "Company not found",

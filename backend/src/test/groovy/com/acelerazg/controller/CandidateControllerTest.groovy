@@ -2,7 +2,7 @@
 //package com.acelerazg.controller
 //
 //import com.acelerazg.dto.AnonymousCandidateDTO
-//import com.acelerazg.dto.CandidateDTO
+//import com.acelerazg.model.CandidateDTO
 //import com.acelerazg.model.Address
 //import com.acelerazg.model.Candidate
 //import com.acelerazg.model.Competency

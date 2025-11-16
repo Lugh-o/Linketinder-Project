@@ -1,6 +1,5 @@
 package com.acelerazg.dao
 
-import com.acelerazg.dto.CompanyDTO
 import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Address
 import com.acelerazg.model.Company
@@ -22,7 +21,7 @@ class CompanyDAO extends DAO {
         this.personDAO = personDAO
     }
 
-    List<CompanyDTO> getAll() {
+    List<Company> getAll() {
         String sql = """
             SELECT 
                 c.id as id_company, c.name, c.cnpj, 
@@ -32,7 +31,7 @@ class CompanyDAO extends DAO {
             INNER JOIN person p ON c.id_person = p.id
             INNER JOIN address a ON p.id_address = a.id
         """
-        List<CompanyDTO> companies = []
+        List<Company> companies = []
 
         try (Connection connection = DatabaseHandler.getConnection()
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -46,7 +45,7 @@ class CompanyDAO extends DAO {
                         .street(resultSet.getString("street"))
                         .build()
 
-                companies.add(new CompanyDTO(resultSet.getString("description"),
+                companies.add(new Company(resultSet.getString("description"),
                         resultSet.getString("email"),
                         resultSet.getString("name"),
                         resultSet.getString("cnpj"),
@@ -61,7 +60,7 @@ class CompanyDAO extends DAO {
         }
     }
 
-    private CompanyDTO getCompanyGeneric(String sql, Object param) {
+    private Company getCompanyGeneric(String sql, Object param) {
         try (Connection connection = DatabaseHandler.getConnection()
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
@@ -76,7 +75,7 @@ class CompanyDAO extends DAO {
                             .city(resultSet.getString("city"))
                             .build()
 
-                    return new CompanyDTO(resultSet.getString("description"),
+                    return new Company(resultSet.getString("description"),
                             resultSet.getString("email"),
                             resultSet.getString("name"),
                             resultSet.getString("cnpj"),
@@ -92,7 +91,7 @@ class CompanyDAO extends DAO {
         }
     }
 
-    CompanyDTO getById(int id) {
+    Company getById(int id) {
         String sql = """
             SELECT 
                 c.id as id_company, c.name, c.cnpj, 
@@ -106,7 +105,7 @@ class CompanyDAO extends DAO {
         return getCompanyGeneric(sql, id)
     }
 
-    CompanyDTO getByEmail(String email) {
+    Company getByEmail(String email) {
         String sql = """
             SELECT 
                 c.id as id_company, c.name, c.cnpj, 
@@ -120,7 +119,7 @@ class CompanyDAO extends DAO {
         return getCompanyGeneric(sql, email)
     }
 
-    Company create(Company company, Address address) {
+    Company create(Company company) {
         String sql = """
             INSERT INTO company (name, cnpj, id_person) VALUES
             (?, ?, ?)
@@ -131,7 +130,7 @@ class CompanyDAO extends DAO {
 
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            company.idAddress = addressDAO.create(connection, address)
+            company.idAddress = addressDAO.create(connection, company.address)
             company.idPerson = personDAO.create(connection, company)
 
             statement.setString(1, company.name)
@@ -154,7 +153,7 @@ class CompanyDAO extends DAO {
         }
     }
 
-    Company update(int id, Company company, Address address) {
+    Company update(int id, Company company) {
         String sql = """
             UPDATE company SET name = ?, cnpj = ?
             WHERE id = ?
@@ -164,7 +163,7 @@ class CompanyDAO extends DAO {
         connection.autoCommit = false
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            Company currentCompany = getById(id).toModel()
+            Company currentCompany = getById(id)
             if (currentCompany == null) {
                 throw new DataAccessException("Candidate not found")
             }
@@ -175,8 +174,8 @@ class CompanyDAO extends DAO {
             company.description = company.description ?: currentCompany.description
             company.passwd = company.passwd ?: currentCompany.passwd
 
-            if (address != null) {
-                addressDAO.update(connection, company.idAddress, address)
+            if (company.address != null) {
+                addressDAO.update(connection, company.idAddress, company.address)
             }
 
             personDAO.update(connection, company)
@@ -187,7 +186,7 @@ class CompanyDAO extends DAO {
             statement.executeUpdate()
 
             connection.commit()
-            return getById(id).toModel()
+            return getById(id)
         } catch (Exception e) {
             if (connection != null) connection.rollback()
             throw e

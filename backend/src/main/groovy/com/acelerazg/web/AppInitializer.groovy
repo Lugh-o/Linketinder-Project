@@ -1,6 +1,6 @@
 package com.acelerazg.web
 
-import com.acelerazg.utils.EnvHandler
+import com.acelerazg.common.EnvHandler
 
 import javax.servlet.ServletContextEvent
 import javax.servlet.ServletContextListener

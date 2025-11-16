@@ -1,11 +1,10 @@
 package com.acelerazg.controller
 
+import com.acelerazg.common.JsonHandler
 import com.acelerazg.common.Response
 import com.acelerazg.dao.*
-import com.acelerazg.dto.CompanyDTO
 import com.acelerazg.model.Company
 import com.acelerazg.service.CompanyService
-import com.acelerazg.utils.JsonHandler
 import groovy.transform.CompileStatic
 
 import javax.servlet.annotation.WebServlet
@@ -57,7 +56,7 @@ class CompanyController extends Controller {
             // POST /api/v1/companies
             if (method == "POST" && path == "/") {
                 Map body = JsonHandler.parseJsonBody(req)
-                CompanyDTO dto = new CompanyDTO(body)
+                Company dto = new Company(body)
                 JsonHandler.write(resp, attachPath(handleCreateCompany(dto), req))
                 return
             }
@@ -74,7 +73,7 @@ class CompanyController extends Controller {
             // PUT /api/v1/companies/{id}
             if (method == "PUT" && path.matches("/\\d+")) {
                 Map body = JsonHandler.parseJsonBody(req)
-                CompanyDTO dto = new CompanyDTO(body)
+                Company dto = new Company(body)
                 int id = (path.split("/")[1] as int)
                 JsonHandler.write(resp, attachPath(handleUpdateCompany(id, dto), req))
                 return
@@ -95,15 +94,15 @@ class CompanyController extends Controller {
         }
     }
 
-    Response<List<CompanyDTO>> handleGetAllCompanies() {
+    Response<List<Company>> handleGetAllCompanies() {
         return companyService.getAllCompanies()
     }
 
-    Response<CompanyDTO> handleGetById(int id) {
+    Response<Company> handleGetById(int id) {
         return companyService.getById(id)
     }
 
-    Response<Company> handleCreateCompany(CompanyDTO companyDTO) {
+    Response<Company> handleCreateCompany(Company companyDTO) {
         return companyService.createCompany(companyDTO)
     }
 
@@ -111,7 +110,7 @@ class CompanyController extends Controller {
         return companyService.likeCandidate(idCompany, idCandidate)
     }
 
-    Response<Company> handleUpdateCompany(int id, CompanyDTO companyDTO) {
+    Response<Company> handleUpdateCompany(int id, Company companyDTO) {
         return companyService.updateCompany(id, companyDTO)
     }
 

@@ -1,10 +1,10 @@
 package com.acelerazg.controller
 
+import com.acelerazg.common.JsonHandler
 import com.acelerazg.common.Response
 import com.acelerazg.dao.MatchEventDAO
 import com.acelerazg.dto.MatchDTO
 import com.acelerazg.service.MatchService
-import com.acelerazg.utils.JsonHandler
 import groovy.transform.CompileStatic
 
 import javax.servlet.annotation.WebServlet

@@ -1,7 +1,6 @@
 package com.acelerazg.dao
 
 import com.acelerazg.dto.AnonymousCandidateDTO
-import com.acelerazg.dto.CandidateDTO
 import com.acelerazg.exceptions.DataAccessException
 import com.acelerazg.model.Address
 import com.acelerazg.model.Candidate
@@ -23,7 +22,7 @@ class CandidateDAO extends DAO {
         this.competencyDAO = competencyDAO
     }
 
-    List<CandidateDTO> getAll() {
+    List<Candidate> getAll() {
         String sql = """            
             SELECT 
                 c.id as id_candidate, c.first_name, c.last_name, c.cpf, c.birthday, c.graduation,
@@ -38,7 +37,7 @@ class CandidateDAO extends DAO {
             GROUP BY c.id, p.id, a.id
         """
 
-        List<CandidateDTO> candidates = []
+        List<Candidate> candidates = []
 
         try (Connection connection = DatabaseHandler.getConnection()
              PreparedStatement statement = connection.prepareStatement(sql)
@@ -55,7 +54,7 @@ class CandidateDAO extends DAO {
                         .city(resultSet.getString("city"))
                         .build()
 
-                candidates.add(new CandidateDTO(resultSet.getString("description"),
+                candidates.add(new Candidate(resultSet.getString("description"),
                         resultSet.getString("email"),
                         resultSet.getString("first_name"),
                         resultSet.getString("last_name"),
@@ -81,19 +80,29 @@ class CandidateDAO extends DAO {
             statement.setObject(1, param)
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    return Candidate.builder()
-                            .idPerson(resultSet.getInt("id_person"))
-                            .email(resultSet.getString("email"))
-                            .description(resultSet.getString("description"))
-                            .passwd(resultSet.getString("passwd"))
-                            .idAddress(resultSet.getInt("id_address"))
-                            .idCandidate(resultSet.getInt("id_candidate"))
-                            .firstName(resultSet.getString("first_name"))
-                            .lastName(resultSet.getString("last_name"))
-                            .cpf(resultSet.getString("cpf"))
-                            .birthday(resultSet.getDate("birthday").toLocalDate())
-                            .graduation(resultSet.getString("graduation"))
+                    String competencyString = resultSet.getString("competencies") ?: ""
+                    List<Competency> competencyList = competencyString ? competencyString.split(', ').collect { String name -> Competency.builder().name(name.trim()).build() } : []
+
+                    Address address = Address.builder()
+                            .state(resultSet.getString("state"))
+                            .postalCode(resultSet.getString("postal_code"))
+                            .country(resultSet.getString("country"))
+                            .street(resultSet.getString("street"))
+                            .city(resultSet.getString("city"))
                             .build()
+
+                    return new Candidate(resultSet.getString("description"),
+                            resultSet.getString("email"),
+                            resultSet.getString("first_name"),
+                            resultSet.getString("last_name"),
+                            resultSet.getString("cpf"),
+                            resultSet.getDate("birthday").toLocalDate(),
+                            resultSet.getString("graduation"),
+                            address,
+                            competencyList,
+                            resultSet.getInt("id_person"),
+                            resultSet.getInt("id_address"),
+                            resultSet.getInt("id_candidate"))
                 }
             }
         } catch (Exception e) {
@@ -105,12 +114,16 @@ class CandidateDAO extends DAO {
         String sql = """            
         SELECT 
             c.id as id_candidate, c.first_name, c.last_name, c.cpf, c.birthday, c.graduation,
-            p.id as id_person, p.email, p.description, p.passwd, p.id_address,
-            a.state, a.postal_code, a.country, a.street, a.city
+            p.id as id_person, p.email, p.description, 
+            a.id as id_address, a.state, a.postal_code, a.country, a.street, a.city,
+            COALESCE(STRING_AGG(co.name, ', '), '') AS competencies
         FROM candidate c
         INNER JOIN person p ON c.id_person = p.id
-        INNER JOIN address a ON a.id = p.id_address            
+        INNER JOIN address a ON a.id = p.id_address
+        INNER JOIN candidate_competency cc ON cc.id_candidate = c.id
+        INNER JOIN competency co ON cc.id_competency = co.id   
         WHERE c.id = ?
+        GROUP BY c.id, p.id, a.id
         """
         return getCandidateGeneric(sql, id)
     }
@@ -119,12 +132,16 @@ class CandidateDAO extends DAO {
         String sql = """
                 SELECT 
                     c.id as id_candidate, c.first_name, c.last_name, c.cpf, c.birthday, c.graduation,
-                    p.id as id_person, p.email, p.description, p.passwd, p.id_address,
-                    a.state, a.postal_code, a.country, a.street, a.city
+                    p.id as id_person, p.email, p.description, 
+                    a.id as id_address, a.state, a.postal_code, a.country, a.street, a.city,
+                    COALESCE(STRING_AGG(co.name, ', '), '') AS competencies
                 FROM candidate c
                 INNER JOIN person p ON c.id_person = p.id
-                INNER JOIN address a ON a.id = p.id_address            
+                INNER JOIN address a ON a.id = p.id_address     
+                INNER JOIN candidate_competency cc ON cc.id_candidate = c.id
+                INNER JOIN competency co ON cc.id_competency = co.id   
                 WHERE p.email = ?
+                GROUP BY c.id, p.id, a.id
         """
         return getCandidateGeneric(sql, email)
     }
@@ -191,7 +208,7 @@ class CandidateDAO extends DAO {
         }
     }
 
-    Candidate create(Candidate candidate, Address address, List<Competency> competencies) {
+    Candidate create(Candidate candidate) {
         String sql = """
             INSERT INTO candidate (first_name, last_name, id_person, cpf, birthday, graduation) VALUES
             (?, ?, ?, ?, ?, ?);
@@ -201,7 +218,7 @@ class CandidateDAO extends DAO {
         connection.autoCommit = false
 
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            candidate.idAddress = addressDAO.create(connection, address)
+            candidate.idAddress = addressDAO.create(connection, candidate.address)
             candidate.idPerson = personDAO.create(connection, candidate)
 
             statement.setString(1, candidate.firstName)
@@ -216,7 +233,7 @@ class CandidateDAO extends DAO {
                     candidate.idCandidate = resultSet.getInt("id")
                 }
             }
-            competencies.forEach { Competency c -> createCandidateCompetency(connection, candidate.idCandidate, c) }
+            candidate.competencies.forEach { Competency c -> createCandidateCompetency(connection, candidate.idCandidate, c) }
 
             connection.commit()
             return candidate
@@ -246,7 +263,7 @@ class CandidateDAO extends DAO {
         }
     }
 
-    Candidate update(int id, Candidate candidate, Address address, List<Competency> newCompetencies) {
+    Candidate update(int id, Candidate candidate) {
         String sql = """
             UPDATE candidate SET first_name = ?, last_name = ?, cpf = ?, birthday = ?, graduation = ?
             WHERE id = ?
@@ -268,14 +285,14 @@ class CandidateDAO extends DAO {
             candidate.description = candidate.description ?: currentCandidate.description
             candidate.passwd = candidate.passwd ?: currentCandidate.passwd
 
-            if (address != null) {
-                addressDAO.update(connection, candidate.idAddress, address)
+            if (candidate.address != null) {
+                addressDAO.update(connection, candidate.idAddress, candidate.address)
             }
 
             personDAO.update(connection, candidate)
 
-            if (newCompetencies != null) {
-                updateCandidateCompetencies(connection, id, newCompetencies)
+            if (candidate.competencies != null) {
+                updateCandidateCompetencies(connection, id, candidate.competencies)
             }
 
             statement.setString(1, candidate.firstName)

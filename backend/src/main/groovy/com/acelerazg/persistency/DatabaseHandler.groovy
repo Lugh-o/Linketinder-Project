@@ -1,6 +1,6 @@
 package com.acelerazg.persistency
 
-import com.acelerazg.utils.EnvHandler
+import com.acelerazg.common.EnvHandler
 import groovy.transform.CompileStatic
 
 import java.sql.Connection

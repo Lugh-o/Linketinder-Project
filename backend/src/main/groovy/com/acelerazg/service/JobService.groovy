@@ -2,7 +2,6 @@ package com.acelerazg.service
 
 import com.acelerazg.common.Response
 import com.acelerazg.dao.JobDAO
-import com.acelerazg.dto.JobDTO
 import com.acelerazg.model.Address
 import com.acelerazg.model.Competency
 import com.acelerazg.model.Job
@@ -18,80 +17,61 @@ class JobService {
         this.jobDAO = jobDAO
     }
 
-    Response<List<JobDTO>> getAllByCompanyId(int id) {
-        List<JobDTO> jobList = jobDAO.getAllByCompanyId(id)
+    Response<List<Job>> getAllByCompanyId(int id) {
+        List<Job> jobList = jobDAO.getAllByCompanyId(id)
         return Response.success(HttpServletResponse.SC_OK, jobList)
     }
 
-    Response<JobDTO> getById(int id) {
-        JobDTO job = jobDAO.getById(id)
+    Response<Job> getById(int id) {
+        Job job = jobDAO.getById(id)
         if (job == null) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND, "Job not found")
         }
         return Response.success(HttpServletResponse.SC_OK, job)
     }
 
-    Response<Job> createJob(JobDTO jobDTO) {
-        Job job = Job.builder()
-                .name(jobDTO.name)
-                .description(jobDTO.description)
-                .idCompany(jobDTO.idCompany)
-                .build()
-
-        Address address = Address.builder()
-                .state(jobDTO.address.state)
-                .postalCode(jobDTO.address.postalCode)
-                .country(jobDTO.address.country)
-                .city(jobDTO.address.city)
-                .street(jobDTO.address.street)
-                .build()
-
-        job = jobDAO.create(job, address, jobDTO.competencies)
-
-        return Response.success(HttpServletResponse.SC_CREATED, job)
+    Response<Job> createJob(Job job) {
+        Job createdJob = jobDAO.create(job)
+        return Response.success(HttpServletResponse.SC_CREATED, createdJob)
     }
 
-    Response<Job> updateJob(int id, JobDTO jobDTO) {
-        JobDTO existingDTO = jobDAO.getById(id)
+    Response<Job> updateJob(int id, Job job) {
+        Job existingDTO = jobDAO.getById(id)
         if (!existingDTO) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND,
                     "Job not found",
                     "No job exists with id " + id,
                     "/api/v1/jobs/" + id)
         }
-        Job existing = existingDTO.toModel()
+        Job existing = existingDTO
 
-        jobDTO.idCompany = existing.idCompany
-        jobDTO.idAddress = existing.idAddress
-        jobDTO.idJob = existing.id
+        job.idCompany = existing.idCompany
+        job.idAddress = existing.idAddress
+        job.idJob = existing.idJob
 
-        if (jobDTO.has("name")) existing.name = jobDTO.name
-        if (jobDTO.has("description")) existing.description = jobDTO.description
+        if (job.has("name")) existing.name = job.name
+        if (job.has("description")) existing.description = job.description
 
-        Address updatedAddress = null
-        if (jobDTO.has("address") && jobDTO.address) {
-            updatedAddress = new Address(jobDTO.address.state,
-                    jobDTO.address.postalCode,
-                    jobDTO.address.country,
-                    jobDTO.address.city,
-                    jobDTO.address.street)
+        if (job.has("address") && job.address) {
+            job.address = new Address(job.address.state,
+                    job.address.postalCode,
+                    job.address.country,
+                    job.address.city,
+                    job.address.street)
         }
 
-        List<Competency> updatedCompetencies
-        if (jobDTO.has("competencies")) {
-            updatedCompetencies = jobDTO.competencies.collect { Competency c -> Competency.builder().name(c.name).build()
+        if (job.has("competencies")) {
+            job.competencies = job.competencies.collect { Competency c -> Competency.builder().name(c.name).build()
             }
-        } else {
-            updatedCompetencies = null
         }
 
-        Job finalJob = jobDAO.update(id, existing, updatedAddress, updatedCompetencies)
+        Job finalJob = jobDAO.update(id, job)
         return Response.success(HttpServletResponse.SC_OK, finalJob)
 
     }
 
     Response<Void> deleteJob(int id) {
-        JobDTO existingDTO = jobDAO.getById(id)
+        Job existingDTO = jobDAO.getById(id)
         if (!existingDTO) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND,
                     "Job not found",

@@ -1,4 +1,4 @@
-package com.acelerazg.utils
+package com.acelerazg.common
 
 import groovy.transform.CompileStatic
 

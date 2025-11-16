@@ -3,7 +3,6 @@ package com.acelerazg.service
 import com.acelerazg.common.Response
 import com.acelerazg.dao.CandidateDAO
 import com.acelerazg.dto.AnonymousCandidateDTO
-import com.acelerazg.dto.CandidateDTO
 import com.acelerazg.model.Address
 import com.acelerazg.model.Candidate
 import com.acelerazg.model.Competency
@@ -19,8 +18,8 @@ class CandidateService {
         this.candidateDAO = candidateDAO
     }
 
-    Response<List<CandidateDTO>> getAllCandidates() {
-        List<CandidateDTO> candidateList = candidateDAO.getAll()
+    Response<List<Candidate>> getAllCandidates() {
+        List<Candidate> candidateList = candidateDAO.getAll()
         return Response.success(HttpServletResponse.SC_OK, candidateList)
     }
 
@@ -37,37 +36,15 @@ class CandidateService {
         return Response.success(HttpServletResponse.SC_OK, anonymousCandidateDTOList)
     }
 
-    Response<Candidate> createCandidate(CandidateDTO candidateDTO) {
-
+    Response<Candidate> createCandidate(Candidate candidateDTO) {
         if (candidateDAO.getByEmail(candidateDTO.email)) {
             return Response.error(HttpServletResponse.SC_CONFLICT,
                     "Email already registered",
                     "The email " + candidateDTO.email + " is already used",
                     "/api/v1/candidates")
         }
-
-        Candidate candidate = Candidate.builder()
-                .description(candidateDTO.description)
-                .passwd(candidateDTO.passwd)
-                .email(candidateDTO.email)
-                .firstName(candidateDTO.firstName)
-                .lastName(candidateDTO.lastName)
-                .cpf(candidateDTO.cpf)
-                .birthday(candidateDTO.birthday)
-                .graduation(candidateDTO.graduation)
-                .build()
-
-        Address address = Address.builder()
-                .state(candidateDTO.address.state)
-                .postalCode(candidateDTO.address.postalCode)
-                .country(candidateDTO.address.country)
-                .city(candidateDTO.address.city)
-                .street(candidateDTO.address.street)
-                .build()
-
-        candidate = candidateDAO.create(candidate, address, candidateDTO.competencies)
-
-        return Response.success(HttpServletResponse.SC_CREATED, candidate)
+        Candidate createdCandidate = candidateDAO.create(candidateDTO)
+        return Response.success(HttpServletResponse.SC_CREATED, createdCandidate)
     }
 
     Response<Map> likeJob(int idCandidate, int idJob) {
@@ -83,7 +60,7 @@ class CandidateService {
         return Response.success(HttpServletResponse.SC_CREATED, payload)
     }
 
-    Response<Candidate> updateCandidate(int id, CandidateDTO candidateDTO) {
+    Response<Candidate> updateCandidate(int id, Candidate candidate) {
         Candidate existing = candidateDAO.getById(id)
         if (!existing) {
             return Response.error(HttpServletResponse.SC_NOT_FOUND,
@@ -92,38 +69,34 @@ class CandidateService {
                     "/api/v1/candidates/" + id)
         }
 
-        candidateDTO.idPerson = existing.idPerson
-        candidateDTO.idAddress = existing.idAddress
-        candidateDTO.idCandidate = existing.idCandidate
+        candidate.idPerson = existing.idPerson
+        candidate.idAddress = existing.idAddress
+        candidate.idCandidate = existing.idCandidate
 
-        if (candidateDTO.has("firstName")) existing.firstName = candidateDTO.firstName
-        if (candidateDTO.has("lastName")) existing.lastName = candidateDTO.lastName
-        if (candidateDTO.has("cpf")) existing.cpf = candidateDTO.cpf
-        if (candidateDTO.has("graduation")) existing.graduation = candidateDTO.graduation
-        if (candidateDTO.has("birthday")) existing.birthday = candidateDTO.birthday
+        if (candidate.has("firstName")) existing.firstName = candidate.firstName
+        if (candidate.has("lastName")) existing.lastName = candidate.lastName
+        if (candidate.has("cpf")) existing.cpf = candidate.cpf
+        if (candidate.has("graduation")) existing.graduation = candidate.graduation
+        if (candidate.has("birthday")) existing.birthday = candidate.birthday
 
-        Address updatedAddress = null
-        if (candidateDTO.has("address") && candidateDTO.address) {
-            updatedAddress = new Address(candidateDTO.address.state,
-                    candidateDTO.address.postalCode,
-                    candidateDTO.address.country,
-                    candidateDTO.address.city,
-                    candidateDTO.address.street)
+        if (candidate.has("address") && candidate.address) {
+            existing.address = new Address(candidate.address.state,
+                    candidate.address.postalCode,
+                    candidate.address.country,
+                    candidate.address.city,
+                    candidate.address.street)
         }
 
-        List<Competency> updatedCompetencies
-        if (candidateDTO.has("competencies")) {
-            updatedCompetencies = candidateDTO.competencies.collect { Competency c -> Competency.builder().name(c.name).build()
+        if (candidate.has("competencies")) {
+            existing.competencies = candidate.competencies.collect { Competency c -> Competency.builder().name(c.name).build()
             }
-        } else {
-            updatedCompetencies = null
         }
 
-        if (candidateDTO.has("email")) existing.email = candidateDTO.email
-        if (candidateDTO.has("description")) existing.description = candidateDTO.description
-        if (candidateDTO.has("passwd")) existing.passwd = candidateDTO.passwd
+        if (candidate.has("email")) existing.email = candidate.email
+        if (candidate.has("description")) existing.description = candidate.description
+        if (candidate.has("passwd")) existing.passwd = candidate.passwd
 
-        Candidate finalCandidate = candidateDAO.update(id, existing, updatedAddress, updatedCompetencies)
+        Candidate finalCandidate = candidateDAO.update(id, existing)
 
         return Response.success(HttpServletResponse.SC_OK, finalCandidate)
     }
