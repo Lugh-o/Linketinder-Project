@@ -117,7 +117,7 @@ Então a aplicação será servida em http://localhost:4173/
 
 Modelo do banco de dados utilizando a plataforma [dbdiagram](https://dbdiagram.io).
 
-<img src="./DER.png" width="900">
+<img src="./DER.png" width="900" alt="">
 
 Dentro da pasta de backend/src/main/resources/db existem 3 arquivos, schema, data e queries, com a definição do banco de dados, a inserção de dados dummy e consultas de vagas do ponto de vista de candidatos, likes que uma empresa recebeu e matches que ocorreram no sistema.
 
