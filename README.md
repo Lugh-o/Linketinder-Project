@@ -1,6 +1,6 @@
 # Linketinder
 
-Uma aplicação que mescla as funcionalidades do Linkedin e do Tinder, para Candidatos darem Match com empresas. Atualmente possui um backend e um frontend isolado, cada um com funcionalidades parciais. O backend está integrado a um banco de dados PostgreSQL.
+Uma aplicação que mescla as funcionalidades do Linkedin e do Tinder, para Candidatos darem Match com empresas. O backend está integrado a um banco de dados PostgreSQL.
 
 ## Funcionalidades
 

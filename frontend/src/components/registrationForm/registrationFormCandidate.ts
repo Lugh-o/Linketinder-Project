@@ -4,6 +4,7 @@ import { Candidate } from "../../types/Candidate";
 import { COMPETENCIES, type Competency } from "../../types/Competency";
 import { type FieldConfig, createLabeledInput } from "./formHelpers";
 import type { AppContext } from "../../utils/AppContext";
+import { Address } from "../../types/Address";
 
 export function registrationFormCandidate(appContext: AppContext): HTMLElement {
 	const form: HTMLFormElement = document.createElement("form");
@@ -12,16 +13,33 @@ export function registrationFormCandidate(appContext: AppContext): HTMLElement {
 		{
 			label: "Nome",
 			type: "text",
-			name: "name",
+			name: "firstName",
+			required: true,
+			minLength: 3,
+		},
+		{
+			label: "Sobrenome",
+			type: "text",
+			name: "lastName",
+			required: true,
+			minLength: 3,
+		},
+		{
+			label: "Senha",
+			type: "password",
+			name: "passwd",
 			required: true,
 			minLength: 3,
 		},
 		{ label: "Email", type: "email", name: "email", required: true },
 		{ label: "Estado", type: "text", name: "state", required: true },
+		{ label: "País", type: "text", name: "country", required: true },
+		{ label: "Cidade", type: "text", name: "city", required: true },
+		{ label: "Rua", type: "text", name: "street", required: true },
 		{
 			label: "CEP (12345-123)",
 			type: "text",
-			name: "cep",
+			name: "postalCode",
 			required: true,
 			pattern: "\\d{5}-?\\d{3}",
 		},
@@ -33,11 +51,11 @@ export function registrationFormCandidate(appContext: AppContext): HTMLElement {
 			pattern: "(\\d{3}.?){2}\\d{3}-?\\d{2}",
 		},
 		{
-			label: "Idade",
-			type: "number",
-			name: "age",
+			label: "Birthday",
+			type: "date",
+			name: "birthday",
+			max: new Date().toISOString().split("T")[0].toString(),
 			required: true,
-			min: 18,
 		},
 		{
 			label: "Formação",
@@ -110,19 +128,30 @@ export function registrationFormCandidate(appContext: AppContext): HTMLElement {
 			compError.textContent = "";
 		}
 
-		const candidate: Candidate = new Candidate(
-			inputMap["name"].value,
-			inputMap["email"].value,
+		const address: Address = new Address(
 			inputMap["state"].value,
-			inputMap["cep"].value,
+			inputMap["postalCode"].value.replace("-", ""),
+			inputMap["country"].value,
+			inputMap["city"].value,
+			inputMap["street"].value
+		);
+
+		const candidate: Candidate = new Candidate(
+			0,
+			0,
+			inputMap["email"].value,
+			inputMap["passwd"].value,
 			inputMap["description"].value,
-			inputMap["cpf"].value,
-			Number(inputMap["age"].value),
+			address,
+			inputMap["firstName"].value,
+			inputMap["lastName"].value,
+			inputMap["cpf"].value.replaceAll(".", "").replaceAll("-", ""),
+			inputMap["birthday"].value,
 			inputMap["graduation"].value,
 			selectedCompetencies
 		);
 
-		appContext.store.addCandidate(candidate);
+		appContext.apiGateway.createCandidate(candidate);
 		appContext.router.goToCandidateDashboard(candidate, appContext);
 	});
 	return form;

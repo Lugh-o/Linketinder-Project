@@ -1,12 +1,12 @@
-import type { Store } from "../persistency/Store";
+import type { ApiGateway } from "./ApiGateway";
 import type { Router } from "./Router";
 
 export class AppContext {
-	store: Store;
+	apiGateway: ApiGateway;
 	router: Router;
 
-	constructor(store: Store, router: Router) {
-		this.store = store;
+	constructor(apiGateway: ApiGateway, router: Router) {
+		this.apiGateway = apiGateway;
 		this.router = router;
 	}
 }

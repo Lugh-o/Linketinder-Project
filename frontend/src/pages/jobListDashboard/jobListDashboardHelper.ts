@@ -6,6 +6,7 @@ import addIcon from "../../assets/add.svg";
 import { COMPETENCIES, type Competency } from "../../types/Competency";
 import { Job } from "../../types/Job";
 import type { AppContext } from "../../utils/AppContext";
+import { Address } from "../../types/Address";
 
 export function createNewJobButton(
 	company: Company,
@@ -32,17 +33,19 @@ export function createNewJobButton(
 	return wrapper;
 }
 
-export function renderJobList(
+export async function renderJobList(
 	company: Company,
 	appContext: AppContext
-): HTMLDivElement {
-	const container = document.createElement("div");
+): Promise<HTMLDivElement> {
+	const container: HTMLDivElement = document.createElement("div");
 	container.className = styles.jobListContainer;
 
-	company.getJobList().forEach((job: Job) => {
-		const jobCard = companyJobCard(job, () => {
-			const index = company.getJobList().indexOf(job);
-			appContext.store.removeJobByIndexFromCompany(company, index);
+	const jobs: Job[] = await appContext.apiGateway.getAllJobsFromCompany(
+		company.idCompany
+	);
+
+	jobs.forEach((job: Job) => {
+		const jobCard: HTMLDivElement = companyJobCard(job, () => {
 			appContext.router.goToJobList(company, appContext);
 		});
 		container.appendChild(jobCard);
@@ -82,16 +85,41 @@ export function buildJobCreationForm(
 
 	form.append(
 		createLabeledInput(
-			"Nome da vaga:",
+			"Nome:",
 			"text",
 			styles.jobNameInput,
 			"jobNameInput"
 		),
 		createLabeledTextarea(
-			"Descrição da vaga:",
+			"Descrição:",
 			styles.jobDescriptionInput,
 			"jobDescriptionInput"
 		),
+		createLabeledInput(
+			"Estado:",
+			"text",
+			styles.jobNameInput,
+			"jobStateInput"
+		),
+		createLabeledInput(
+			"Cidade:",
+			"text",
+			styles.jobNameInput,
+			"jobCityInput"
+		),
+		createLabeledInput(
+			"Rua:",
+			"text",
+			styles.jobNameInput,
+			"jobStreetInput"
+		),
+		createLabeledInput(
+			"País:",
+			"text",
+			styles.jobNameInput,
+			"jobCountrytInput"
+		),
+		createLabeledInput("CEP:", "text", styles.jobNameInput, "jobZipInput"),
 		createCompetencySelector(),
 		createFormButtons(company, overlay, form, appContext)
 	);
@@ -213,6 +241,14 @@ export function handleJobFormSubmit(
 	const descriptionInput = form.querySelector<HTMLTextAreaElement>(
 		"#jobDescriptionInput"
 	);
+	const countryInput =
+		form.querySelector<HTMLTextAreaElement>("#jobCountryInput");
+	const stateInput =
+		form.querySelector<HTMLTextAreaElement>("#jobStateInput");
+	const cityInput = form.querySelector<HTMLTextAreaElement>("#jobCityInput");
+	const streetInput =
+		form.querySelector<HTMLTextAreaElement>("#jobStreetInput");
+	const zipInput = form.querySelector<HTMLTextAreaElement>("#jobZipInput");
 	const selectedCompetencies = Array.from(
 		form.querySelectorAll<HTMLInputElement>(
 			"input[name='competencies']:checked"
@@ -229,13 +265,24 @@ export function handleJobFormSubmit(
 		return;
 	}
 
-	const newJob = new Job(
-		nameInput.value.trim(),
-		descriptionInput.value.trim(),
-		selectedCompetencies
+	const address: Address = new Address(
+		stateInput?.value.trim() ?? "",
+		zipInput?.value.trim() ?? "",
+		countryInput?.value.trim() ?? "",
+		cityInput?.value.trim() ?? "",
+		streetInput?.value.trim() ?? ""
 	);
 
-	appContext.store.addJobToCompany(company, newJob);
+	const newJob = new Job(
+		0,
+		company.idCompany,
+		nameInput.value.trim(),
+		descriptionInput.value.trim(),
+		selectedCompetencies,
+		address
+	);
+
+	appContext.apiGateway.createJob(newJob);
 	overlay.remove();
 
 	appContext.router.goToCompanyDashboard(company, appContext);

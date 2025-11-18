@@ -1,27 +1,35 @@
-import type { Competency } from "./Competency.ts";
+import type { Address } from "./Address.ts";
 import { Person } from "./Person.ts";
 
 export class Candidate extends Person {
+	idCandidate: number;
+	firstName: string;
+	lastName: string;
 	cpf: string;
-	age: number;
+	birthday: string;
 	graduation: string;
-	competencies: Competency[];
+	competencies: string[];
 
 	constructor(
-		name: string,
+		idCandidate: number,
+		idPerson: number,
 		email: string,
-		state: string,
-		cep: string,
+		passwd: string,
 		description: string,
+		address: Address,
+		firstName: string,
+		lastName: string,
 		cpf: string,
-		age: number,
+		birthday: string,
 		graduation: string,
-		competencies: Competency[],
-		id?: number
+		competencies: string[]
 	) {
-		super(id ?? 0, name, email, state, cep, description);
+		super(idPerson, email, passwd, description, address);
+		this.idCandidate = idCandidate;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.cpf = cpf;
-		this.age = age;
+		this.birthday = birthday;
 		this.graduation = graduation;
 		this.competencies = competencies;
 	}

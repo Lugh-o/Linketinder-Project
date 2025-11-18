@@ -1,5 +1,6 @@
 package com.acelerazg.controller
 
+import com.acelerazg.common.CorsHandler
 import com.acelerazg.common.JsonHandler
 import com.acelerazg.common.Response
 import com.acelerazg.dao.AddressDAO
@@ -30,6 +31,8 @@ class JobController extends Controller {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        CorsHandler.applyCorsHeaders(resp, req)
+
         String method = req.method
         String path = req.pathInfo ?: "/"
 
@@ -37,6 +40,12 @@ class JobController extends Controller {
         resp.characterEncoding = "UTF-8"
 
         try {
+            // GET /api/v1/jobs/candidate
+            if (method == "GET" && path.matches("/candidate")) {
+                JsonHandler.write(resp, attachPath(handleGetAllAsCandidate(), req))
+                return
+            }
+
             // GET /api/v1/jobs/{id}/company
             if (method == "GET" && path.matches("/\\d+/company")) {
                 int companyId = (path.split("/")[1] as int)
@@ -68,7 +77,7 @@ class JobController extends Controller {
                 return
             }
 
-            // DELETE /api/v1/candidates/{id}
+            // DELETE /api/v1/jobs/{id}
             if (method == "DELETE" && path.matches("/\\d+")) {
                 int id = (path.substring(1) as int)
                 JsonHandler.write(resp, attachPath(handleDeleteJob(id), req))
@@ -80,6 +89,10 @@ class JobController extends Controller {
             e.printStackTrace()
             JsonHandler.writeError(resp, 500, e.message)
         }
+    }
+
+    Response<List<Job>> handleGetAllAsCandidate() {
+        return jobService.getAllAsCandidate()
     }
 
     Response<List<Job>> handleGetAllByCompanyId(int id) {

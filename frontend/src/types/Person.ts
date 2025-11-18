@@ -1,24 +1,23 @@
+import type { Address } from "./Address";
+
 export abstract class Person {
-	id: number;
-	name: string;
+	idPerson: number;
 	email: string;
-	state: string;
-	cep: string;
+	passwd: string;
 	description: string;
+	address: Address;
 
 	constructor(
-		id: number,
-		name: string,
+		idPerson: number,
 		email: string,
-		state: string,
-		cep: string,
-		description: string
+		passwd: string,
+		description: string,
+		address: Address
 	) {
-		this.id = id;
-		this.name = name;
+		this.idPerson = idPerson;
 		this.email = email;
-		this.state = state;
-		this.cep = cep;
+		this.passwd = passwd;
 		this.description = description;
+		this.address = address;
 	}
 }

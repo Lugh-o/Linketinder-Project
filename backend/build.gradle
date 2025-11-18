@@ -71,5 +71,4 @@ tasks.register('deployToTomcat') {
             commandLine 'sudo', 'systemctl', 'restart', 'tomcat'
         }
     }
-
 }

@@ -1,6 +1,7 @@
 import { Company } from "../../types/Company";
 import { type FieldConfig, createLabeledInput } from "./formHelpers";
 import { AppContext } from "../../utils/AppContext";
+import { Address } from "../../types/Address";
 
 export function registrationFormCompany(appContext: AppContext): HTMLElement {
 	const form: HTMLFormElement = document.createElement("form");
@@ -13,13 +14,23 @@ export function registrationFormCompany(appContext: AppContext): HTMLElement {
 			required: true,
 			minLength: 3,
 		},
+
 		{ label: "Email", type: "email", name: "email", required: true },
+		{
+			label: "Senha",
+			type: "password",
+			name: "passwd",
+			required: true,
+			minLength: 3,
+		},
 		{ label: "Estado", type: "text", name: "state", required: true },
 		{ label: "País", type: "text", name: "country", required: true },
+		{ label: "Cidade", type: "text", name: "city", required: true },
+		{ label: "Rua", type: "text", name: "street", required: true },
 		{
 			label: "CEP (12345-123)",
 			type: "text",
-			name: "cep",
+			name: "postalCode",
 			required: true,
 			pattern: "\\d{5}-?\\d{3}",
 		},
@@ -68,16 +79,28 @@ export function registrationFormCompany(appContext: AppContext): HTMLElement {
 			return;
 		}
 
-		const company: Company = new Company(
-			inputMap["name"].value,
-			inputMap["email"].value,
+		const address: Address = new Address(
 			inputMap["state"].value,
-			inputMap["cep"].value,
-			inputMap["description"].value,
-			inputMap["cnpj"].value,
-			inputMap["country"].value
+			inputMap["postalCode"].value.replace("-", ""),
+			inputMap["country"].value,
+			inputMap["city"].value,
+			inputMap["street"].value
 		);
-		appContext.store.addCompany(company);
+
+		const company: Company = new Company(
+			0,
+			0,
+			inputMap["email"].value,
+			inputMap["passwd"].value,
+			inputMap["description"].value,
+			address,
+			inputMap["cnpj"].value
+				.replaceAll(".", "")
+				.replaceAll("-", "")
+				.replaceAll("/", ""),
+			inputMap["name"].value
+		);
+		appContext.apiGateway.createCompany(company);
 		appContext.router.goToCompanyDashboard(company, appContext);
 	});
 

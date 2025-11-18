@@ -1,5 +1,6 @@
 package com.acelerazg.controller
 
+import com.acelerazg.common.CorsHandler
 import com.acelerazg.common.JsonHandler
 import com.acelerazg.common.Response
 import com.acelerazg.dao.*
@@ -32,6 +33,8 @@ class CompanyController extends Controller {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        CorsHandler.applyCorsHeaders(resp, req)
+
         String method = req.method
         String path = req.pathInfo ?: "/"
 
@@ -39,7 +42,6 @@ class CompanyController extends Controller {
         resp.characterEncoding = "UTF-8"
 
         try {
-
             // GET /api/v1/companies
             if (method == "GET" && path == "/") {
                 JsonHandler.write(resp, attachPath(handleGetAllCompanies(), req))

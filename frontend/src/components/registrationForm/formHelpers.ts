@@ -7,7 +7,8 @@ export interface FieldConfig {
 	required?: boolean;
 	minLength?: number;
 	pattern?: string;
-	min?: number;
+	min?: number | string;
+	max?: number | string;
 }
 
 export function createLabeledInput(field: FieldConfig): HTMLDivElement {

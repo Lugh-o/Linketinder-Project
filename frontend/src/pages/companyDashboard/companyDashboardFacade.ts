@@ -13,7 +13,7 @@ export class CompanyDashboardFacade {
 		this.appContext = appContext;
 	}
 
-	render(company: Company): HTMLDivElement {
+	async render(company: Company): Promise<HTMLDivElement> {
 		const container: HTMLDivElement = document.createElement("div");
 		container.className = styles.companyDashboardContainer;
 
@@ -27,7 +27,8 @@ export class CompanyDashboardFacade {
 			document.createElement("div");
 		scrollableContainer.className = styles.scrollableContainer;
 
-		const candidateListContainer = this.createCandidateListContainer();
+		const candidateListContainer =
+			await this.createCandidateListContainer();
 		const chartContainer = this.createCompetencyChart(
 			candidateListContainer.data
 		);
@@ -36,13 +37,14 @@ export class CompanyDashboardFacade {
 		scrollableContainer.appendChild(candidateListContainer.element);
 
 		container.appendChild(scrollableContainer);
+
 		return container;
 	}
 
-	private createCandidateListContainer(): {
+	private async createCandidateListContainer(): Promise<{
 		element: HTMLDivElement;
 		data: Record<Competency, number>;
-	} {
+	}> {
 		const candidateListContainer: HTMLDivElement =
 			document.createElement("div");
 		candidateListContainer.className = styles.candidateListContainer;
@@ -50,7 +52,9 @@ export class CompanyDashboardFacade {
 		const data: Record<Competency, number> = {};
 		COMPETENCIES.forEach((c) => (data[c] = 0));
 
-		this.appContext.store.getCandidateList().forEach((candidate) => {
+		const candidates = await this.appContext.apiGateway.getAllCandidates();
+
+		candidates.forEach((candidate) => {
 			const card: HTMLDivElement = candidateCard(candidate);
 			candidateListContainer.appendChild(card);
 

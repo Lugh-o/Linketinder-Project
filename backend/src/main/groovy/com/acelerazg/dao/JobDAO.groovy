@@ -22,6 +22,48 @@ class JobDAO extends DAO {
         this.competencyDAO = competencyDAO
     }
 
+    List<Job> getAllJobsAsCandidate() {
+        String sql = """
+            SELECT 
+                j.id as id_job, j.name,	j.description, j.id_company,
+                STRING_AGG(DISTINCT ct.name, ', ') AS competencies,
+                a.id as id_address, a.city,	a.state
+            FROM job j
+            INNER JOIN job_competency jc ON jc.id_job = j.id
+            INNER JOIN competency ct ON jc.id_competency = ct.id
+            INNER JOIN address a ON j.id_address = a.id
+            GROUP BY j.id, a.id;
+        """
+        List<Job> jobs = []
+
+        try (Connection connection = DatabaseHandler.getConnection()
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String competencyString = resultSet.getString("competencies") ?: ""
+                    List<Competency> competencyList = competencyString ? competencyString.split(', ').collect { String name -> Competency.builder().name(name.trim()).build() } : []
+
+                    Address address = Address.builder()
+                            .state(resultSet.getString("state"))
+                            .city(resultSet.getString("city"))
+                            .build()
+
+                    jobs.add(new Job(resultSet.getString("name"),
+                            resultSet.getString("description"),
+                            address,
+                            competencyList,
+                            resultSet.getInt("id_company"),
+                            resultSet.getInt("id_address"),
+                            resultSet.getInt("id_job"),))
+                }
+                return jobs
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Error fetching jobs", e)
+        }
+    }
+
     List<Job> getAllByCompanyId(int id) {
         String sql = """
             SELECT

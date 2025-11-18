@@ -1,20 +1,26 @@
-import type { Competency } from "./Competency";
+import type { Address } from "./Address";
 
 export class Job {
-	id?: number;
+	idJob: number;
+	idCompany: number;
 	name: string;
 	description: string;
-	competencies: Competency[];
+	competencies: string[];
+	address: Address;
 
 	constructor(
+		idJob: number,
+		idCompany: number,
 		name: string,
 		description: string,
-		competencies: Competency[],
-		id?: number
+		competencies: string[],
+		address: Address
 	) {
-		this.id = id ?? 0;
+		this.idJob = idJob;
+		this.idCompany = idCompany;
 		this.name = name;
 		this.description = description;
 		this.competencies = competencies;
+		this.address = address;
 	}
 }

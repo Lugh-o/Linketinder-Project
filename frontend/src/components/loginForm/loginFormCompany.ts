@@ -5,7 +5,7 @@ import type { AppContext } from "../../utils/AppContext";
 export function loginFormCompany(appContext: AppContext): HTMLElement {
 	return generateCommonLoginForm(
 		"Entrar como empresa",
-		() => appContext.store.getCompanyList(),
+		() => appContext.apiGateway.getAllCompanies(),
 		(company: Company) =>
 			appContext.router.goToCompanyDashboard(company, appContext)
 	);

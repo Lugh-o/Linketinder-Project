@@ -4,6 +4,7 @@ import { Person } from "../../types/Person";
 import PersonIcon from "../../assets/person.svg";
 import CompanyIcon from "../../assets/company.svg";
 import { Candidate } from "../../types/Candidate";
+import { Company } from "../../types/Company";
 
 export function buildHeader<T extends Person>(
 	person: T,
@@ -43,7 +44,7 @@ export function createHeaderButton(
 	className: string,
 	onClick: () => void
 ): HTMLButtonElement {
-	const button = document.createElement("button");
+	const button: HTMLButtonElement = document.createElement("button");
 	button.textContent = label;
 	button.className = className;
 	button.addEventListener("click", onClick);
@@ -54,15 +55,16 @@ function buildProfile<T extends Person>(person: T): HTMLDivElement {
 	const wrapper = document.createElement("div");
 	wrapper.className = styles.profileWrapper;
 
-	const image = document.createElement("img");
-	if (person instanceof Candidate) {
-		image.src = PersonIcon;
-	} else {
-		image.src = CompanyIcon;
-	}
+	const image: HTMLImageElement = document.createElement("img");
+	const name: HTMLHeadingElement = document.createElement("h4");
 
-	const name = document.createElement("h4");
-	name.textContent = person.name;
+	if (person instanceof Company) {
+		name.textContent = person.name;
+		image.src = CompanyIcon;
+	} else if (person instanceof Candidate) {
+		name.textContent = person.firstName;
+		image.src = PersonIcon;
+	}
 
 	wrapper.appendChild(image);
 	wrapper.appendChild(name);

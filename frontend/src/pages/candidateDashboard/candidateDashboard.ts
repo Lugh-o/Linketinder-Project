@@ -6,10 +6,10 @@ import { candidateJobCard } from "../../components/jobCard/candidateJobCard";
 import { candidateHeader } from "../../components/header/candidateHeader";
 import type { AppContext } from "../../utils/AppContext";
 
-export function candidateDashboard(
+export async function candidateDashboard(
 	candidate: Candidate,
 	appContext: AppContext
-): HTMLDivElement {
+): Promise<HTMLDivElement> {
 	const container: HTMLDivElement = document.createElement("div");
 
 	const headerElement: HTMLElement = candidateHeader(candidate, appContext);
@@ -18,7 +18,7 @@ export function candidateDashboard(
 	const jobListContainer: HTMLDivElement = document.createElement("div");
 	jobListContainer.className = styles.jobListContainer;
 
-	const jobList: Job[] = appContext.store.getJobList();
+	const jobList: Job[] = await appContext.apiGateway.getAllJobsAsCandidate();
 
 	jobList.forEach((job) => {
 		const card = candidateJobCard(job, candidate);

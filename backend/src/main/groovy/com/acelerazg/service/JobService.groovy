@@ -17,6 +17,11 @@ class JobService {
         this.jobDAO = jobDAO
     }
 
+    Response<List<Job>> getAllAsCandidate() {
+        List<Job> jobList = jobDAO.getAllJobsAsCandidate()
+        return Response.success(HttpServletResponse.SC_OK, jobList)
+    }
+
     Response<List<Job>> getAllByCompanyId(int id) {
         List<Job> jobList = jobDAO.getAllByCompanyId(id)
         return Response.success(HttpServletResponse.SC_OK, jobList)
